@@ -1,0 +1,7 @@
+import { Observable } from 'rxjs';
+import { SignInRequest, SignUpRequest } from '../domain/user.model';
+
+export abstract class AuthPort {
+  abstract signIn(request: SignInRequest): Observable<string>;
+  abstract signUp(request: SignUpRequest): Observable<string>;
+}
