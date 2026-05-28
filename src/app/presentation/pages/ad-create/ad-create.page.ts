@@ -5,8 +5,8 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { AdService } from '../../../application/ads/ad.service';
-import { AuthService } from '../../../application/auth/auth.service';
+import { AdService } from '@/application/ads/ad.service';
+import { AuthService } from '@/application/auth/auth.service';
 
 @Component({
   selector: 'app-ad-create',
@@ -36,7 +36,11 @@ import { AuthService } from '../../../application/auth/auth.service';
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Description</mat-label>
-              <textarea matInput formControlName="description" rows="4"></textarea>
+              <textarea
+                matInput
+                formControlName="description"
+                rows="4"
+              ></textarea>
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Location</mat-label>
@@ -44,7 +48,11 @@ import { AuthService } from '../../../application/auth/auth.service';
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Starting Bid Price</mat-label>
-              <input matInput type="number" formControlName="startingBidPrice" />
+              <input
+                matInput
+                type="number"
+                formControlName="startingBidPrice"
+              />
             </mat-form-field>
             <mat-form-field appearance="outline">
               <mat-label>Bid Step</mat-label>
@@ -57,7 +65,12 @@ import { AuthService } from '../../../application/auth/auth.service';
             @if (error) {
               <p style="color:red;font-size:0.85rem">{{ error }}</p>
             }
-            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="form.invalid"
+            >
               Create Auction
             </button>
           </form>
@@ -75,18 +88,38 @@ export class AdCreatePage {
   error = '';
 
   form = this.fb.group({
-    title: ['', [Validators.required, Validators.minLength(3), Validators.maxLength(100)]],
-    description: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
+    title: [
+      '',
+      [Validators.required, Validators.minLength(3), Validators.maxLength(100)],
+    ],
+    description: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(10),
+        Validators.maxLength(1000),
+      ],
+    ],
     location: ['', Validators.required],
-    startingBidPrice: [null as number | null, [Validators.required, Validators.min(0.01)]],
-    bidStep: [null as number | null, [Validators.required, Validators.min(0.01)]],
+    startingBidPrice: [
+      null as number | null,
+      [Validators.required, Validators.min(0.01)],
+    ],
+    bidStep: [
+      null as number | null,
+      [Validators.required, Validators.min(0.01)],
+    ],
     image: [''],
   });
 
   onSubmit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      return;
+    }
+
     const v = this.form.value;
     const userId = this.auth.getUserIdFromToken();
+
     this.adService
       .create({
         title: v.title!,

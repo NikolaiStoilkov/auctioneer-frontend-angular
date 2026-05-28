@@ -24,7 +24,12 @@ export class ZardDebounceEventManagerPlugin extends EventManagerPlugin {
       clearTimeout(timeoutId);
       timeoutId = setTimeout(() => handler(event), resolvedDelay);
     };
-    const unsubscribe = this.manager.addEventListener(element, event, listener, options);
+    const unsubscribe = this.manager.addEventListener(
+      element,
+      event,
+      listener,
+      options,
+    );
     return () => {
       clearTimeout(timeoutId);
       unsubscribe();

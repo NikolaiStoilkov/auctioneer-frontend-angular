@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Observable } from 'rxjs';
-import { CommentPort } from '../../core/ports/comment.port';
-import { Comment } from '../../core/domain/comment.model';
+import { CommentPort } from '@/core/ports/comment.port';
+import { Comment } from '@/core/domain/comment.model';
 
 @Injectable({ providedIn: 'root' })
 export class CommentService {

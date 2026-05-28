@@ -1,7 +1,9 @@
 export interface LastBidder {
   id: number;
   userId: number;
-  amount: number;
+  username?: string;
+  amount?: number;
+  timestamp?: string;
 }
 
 export interface Ad {
@@ -34,4 +36,12 @@ export interface BidRequest {
   adId: number;
   userId: number;
   amount: number;
+}
+
+export interface BidResponse {
+  adId: number;
+  currentBidPrice: number;
+  nextMinimumBid: number;
+  latestBidderUsername: string;
+  timestamp: string;
 }

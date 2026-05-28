@@ -1,8 +1,8 @@
 import { Injectable, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { Observable, tap } from 'rxjs';
-import { AuthPort } from '../../core/ports/auth.port';
-import { SignInRequest, SignUpRequest } from '../../core/domain/user.model';
+import { AuthPort } from '@/core/ports/auth.port';
+import { SignInRequest, SignUpRequest } from '@/core/domain/user.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -42,7 +42,9 @@ export class AuthService {
 
   getToken(): string | null {
     const token = localStorage.getItem(this.TOKEN_KEY);
-    if (!token) return null;
+    if (!token) {
+      return null;
+    }
     if (this.isTokenExpired(token)) {
       this.logout();
       return null;
@@ -52,11 +54,15 @@ export class AuthService {
 
   getUserIdFromToken(): number | null {
     const token = this.getToken();
-    if (!token) return null;
+    if (!token) {
+      return null;
+    }
     try {
       const payload = this.decodePayload(token);
       const sub = payload?.['sub'] ?? payload?.['id'] ?? payload?.['userId'];
-      if (sub == null) return null;
+      if (sub == null) {
+        return null;
+      }
       return Number(sub);
     } catch {
       return null;
@@ -65,7 +71,9 @@ export class AuthService {
 
   private checkValidToken(): boolean {
     const token = localStorage.getItem(this.TOKEN_KEY);
-    if (!token) return false;
+    if (!token) {
+      return false;
+    }
     return !this.isTokenExpired(token);
   }
 
@@ -80,7 +88,9 @@ export class AuthService {
   isTokenExpired(token: string): boolean {
     try {
       const payload = this.decodePayload(token);
-      if (!payload?.['exp']) return false;
+      if (!payload?.['exp']) {
+        return false;
+      }
       return Date.now() >= payload['exp'] * 1000;
     } catch {
       return true;

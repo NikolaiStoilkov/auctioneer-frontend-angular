@@ -37,15 +37,20 @@ export class ZardEventManagerPlugin extends EventManagerPlugin {
     options?: ListenerOptions,
     // eslint-disable-next-line
   ): Function {
-    const { event, keyword, keys } = this.#provideEventFrom(eventName, this.#keywords);
+    const { event, keyword, keys } = this.#provideEventFrom(
+      eventName,
+      this.#keywords,
+    );
     return this.manager.addEventListener(
       element,
       event,
       (event: Event) => {
         const isKeyboardEvent = event instanceof KeyboardEvent;
-        const isElementDisabled = element.getAttribute('aria-disabled') === 'true';
+        const isElementDisabled =
+          element.getAttribute('aria-disabled') === 'true';
         const shouldApplyModifier =
-          (!keys.length || (isKeyboardEvent && keys.includes(event.key.toLowerCase()))) &&
+          (!keys.length ||
+            (isKeyboardEvent && keys.includes(event.key.toLowerCase()))) &&
           !isElementDisabled;
 
         if (shouldApplyModifier) {

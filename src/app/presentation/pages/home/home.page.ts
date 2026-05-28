@@ -6,11 +6,18 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Ad, AdFilter } from '@/core/domain/ad.model';
 import { AdService } from '@/application/ads/ad.service';
+import { NotificationService } from '@/application/notification/notification.service';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [RouterLink, MatCardModule, MatButtonModule, MatChipsModule, MatProgressSpinnerModule],
+  imports: [
+    RouterLink,
+    MatCardModule,
+    MatButtonModule,
+    MatChipsModule,
+    MatProgressSpinnerModule,
+  ],
   template: `
     <div style="max-width:1100px;margin:0 auto;padding:24px 16px">
       <h1 style="margin-bottom:24px">Active Auctions</h1>
@@ -39,7 +46,9 @@ import { AdService } from '@/application/ads/ad.service';
                 </div>
               }
               <mat-card-header style="padding:12px 12px 0">
-                <mat-card-title style="font-size:1rem">{{ ad.title }}</mat-card-title>
+                <mat-card-title style="font-size:1rem">{{
+                  ad.title
+                }}</mat-card-title>
                 <mat-card-subtitle>{{ ad.location }}</mat-card-subtitle>
               </mat-card-header>
               <mat-card-content style="padding:8px 12px">
@@ -51,11 +60,13 @@ import { AdService } from '@/application/ads/ad.service';
                 <div
                   style="margin-top:8px;display:flex;justify-content:space-between;align-items:center"
                 >
-                  <span style="font-weight:500;color:#1976d2"
-                    >Current: \${{ ad.currentBidPrice ?? ad.startingBidPrice }}</span
-                  >
+                  <span style="font-weight:500;color:#1976d2">
+                    Current: \${{ livePrice(ad) }}
+                  </span>
                   <mat-chip-set>
-                    <mat-chip [style.background]="statusColor(ad.status)">{{ ad.status }}</mat-chip>
+                    <mat-chip [style.background]="statusColor(ad.status)">{{
+                      ad.status
+                    }}</mat-chip>
                   </mat-chip-set>
                 </div>
               </mat-card-content>
@@ -66,10 +77,18 @@ import { AdService } from '@/application/ads/ad.service';
           }
         </div>
         @if (ads().length > 0) {
-          <div style="display:flex;justify-content:center;gap:12px;margin-top:32px">
-            <button mat-button [disabled]="page() === 1" (click)="prevPage()">Previous</button>
+          <div
+            style="display:flex;justify-content:center;gap:12px;margin-top:32px"
+          >
+            <button mat-button [disabled]="page() === 1" (click)="prevPage()">
+              Previous
+            </button>
             <span style="line-height:36px">Page {{ page() }}</span>
-            <button mat-button [disabled]="ads().length < pageSize" (click)="nextPage()">
+            <button
+              mat-button
+              [disabled]="ads().length < pageSize"
+              (click)="nextPage()"
+            >
               Next
             </button>
           </div>
@@ -80,6 +99,7 @@ import { AdService } from '@/application/ads/ad.service';
 })
 export class HomePage implements OnInit {
   private adService = inject(AdService);
+  ns = inject(NotificationService);
 
   ads = signal<Ad[]>([]);
   loading = signal(true);
@@ -92,10 +112,17 @@ export class HomePage implements OnInit {
 
   load(): void {
     this.loading.set(true);
-    const filter: AdFilter = { active: true, page: this.page(), size: this.pageSize };
+
+    const filter: AdFilter = {
+      active: true,
+      page: this.page(),
+      size: this.pageSize,
+    };
+
     this.adService.getPaginated(filter).subscribe({
       next: (data) => {
         this.ads.set(data);
+
         this.loading.set(false);
       },
       error: () => this.loading.set(false),
@@ -105,6 +132,7 @@ export class HomePage implements OnInit {
   prevPage(): void {
     if (this.page() > 1) {
       this.page.update((p) => p - 1);
+
       this.load();
     }
   }
@@ -114,9 +142,22 @@ export class HomePage implements OnInit {
     this.load();
   }
 
+  livePrice(ad: Ad): string {
+    const price =
+      this.ns.liveAdPrices()[ad.id!] ??
+      ad.currentBidPrice ??
+      ad.startingBidPrice;
+
+    return Number(price).toFixed(2);
+  }
+
   statusColor(status?: string): string {
-    if (status === 'ACTIVE') return '#c8e6c9';
-    if (status === 'SOLD') return '#ffcdd2';
+    if (status === 'ACTIVE') {
+      return '#c8e6c9';
+    }
+    if (status === 'SOLD') {
+      return '#ffcdd2';
+    }
     return '#fff9c4';
   }
 }

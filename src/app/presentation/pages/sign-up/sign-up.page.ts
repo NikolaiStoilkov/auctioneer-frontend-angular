@@ -5,7 +5,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { AuthService } from '../../../application/auth/auth.service';
+import { AuthService } from '@/application/auth/auth.service';
 
 @Component({
   selector: 'app-sign-up',
@@ -81,7 +81,12 @@ import { AuthService } from '../../../application/auth/auth.service';
             @if (error) {
               <p style="color:red;font-size:0.85rem">{{ error }}</p>
             }
-            <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="form.invalid"
+            >
               Sign Up
             </button>
           </form>
@@ -114,12 +119,19 @@ export class SignUpPage {
     city: ['', Validators.required],
     street: ['', Validators.required],
     streetNumber: ['', Validators.required],
-    postalCode: ['', [Validators.required, Validators.pattern(/^[0-9]{4,10}$/)]],
+    postalCode: [
+      '',
+      [Validators.required, Validators.pattern(/^[0-9]{4,10}$/)],
+    ],
   });
 
   onSubmit(): void {
-    if (this.form.invalid) return;
+    if (this.form.invalid) {
+      return;
+    }
+
     const v = this.form.value;
+
     this.authService
       .signUp({
         username: v.username!,
