@@ -43,5 +43,6 @@ export interface BidResponse {
   currentBidPrice: number;
   nextMinimumBid: number;
   latestBidderUsername: string;
+  latestBidderUserId?: number;
   timestamp: string;
 }

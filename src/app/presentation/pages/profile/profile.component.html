@@ -1,0 +1,230 @@
+<div class="profile-layout">
+  <mat-card class="profile-sidenav">
+    <mat-card-content style="padding: 8px 0">
+      <p class="section-title">Account</p>
+      <mat-nav-list>
+        <mat-list-item
+          class="nav-item"
+          [class.active]="activeTab() === 'info'"
+          (click)="setTab('info')"
+        >
+          <mat-icon matListItemIcon>person</mat-icon>
+          <span matListItemTitle>Profile Information</span>
+        </mat-list-item>
+        <mat-list-item
+          class="nav-item"
+          [class.active]="activeTab() === 'payment'"
+          (click)="setTab('payment')"
+        >
+          <mat-icon matListItemIcon>credit_card</mat-icon>
+          <span matListItemTitle>Add Payment Method</span>
+        </mat-list-item>
+      </mat-nav-list>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="profile-content">
+    @if (activeTab() === 'info') {
+      <mat-card-header>
+        <mat-card-title>Profile Information</mat-card-title>
+        <mat-card-subtitle>Update your personal details</mat-card-subtitle>
+      </mat-card-header>
+      <mat-card-content style="padding-top: 16px">
+        @if (loading()) {
+          <div style="display: flex; justify-content: center; padding: 32px">
+            <mat-spinner></mat-spinner>
+          </div>
+        } @else {
+          <form
+            [formGroup]="form"
+            (ngSubmit)="onSubmit()"
+            style="display: flex; flex-direction: column; gap: 10px"
+          >
+            <mat-form-field appearance="outline">
+              <mat-label>Username</mat-label>
+              <mat-icon matPrefix>account_circle</mat-icon>
+              <input matInput formControlName="username" />
+            </mat-form-field>
+            <div style="display: flex; gap: 12px">
+              <mat-form-field appearance="outline" style="flex: 1">
+                <mat-label>First Name</mat-label>
+                <input matInput formControlName="firstName" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" style="flex: 1">
+                <mat-label>Last Name</mat-label>
+                <input matInput formControlName="lastName" />
+              </mat-form-field>
+            </div>
+            <mat-form-field appearance="outline">
+              <mat-label>Email</mat-label>
+              <mat-icon matPrefix>email</mat-icon>
+              <input matInput formControlName="email" type="email" />
+            </mat-form-field>
+            <mat-form-field appearance="outline">
+              <mat-label>Phone</mat-label>
+              <mat-icon matPrefix>phone</mat-icon>
+              <input matInput formControlName="phoneNumber" />
+            </mat-form-field>
+            <div style="display: flex; gap: 12px">
+              <mat-form-field appearance="outline" style="flex: 1">
+                <mat-label>City</mat-label>
+                <input matInput formControlName="city" />
+              </mat-form-field>
+              <mat-form-field appearance="outline" style="flex: 1">
+                <mat-label>Country</mat-label>
+                <input matInput formControlName="country" />
+              </mat-form-field>
+            </div>
+            @if (profileSuccess) {
+              <p style="color: #388e3c; font-size: 0.85rem; margin: 0">
+                ✓ Profile updated successfully.
+              </p>
+            }
+            @if (profileError) {
+              <p style="color: #d32f2f; font-size: 0.85rem; margin: 0">
+                {{ profileError }}
+              </p>
+            }
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="form.invalid || saving()"
+            >
+              @if (saving()) {
+                <mat-spinner
+                  diameter="20"
+                  style="display: inline-block"
+                ></mat-spinner>
+              } @else {
+                Save Changes
+              }
+            </button>
+          </form>
+        }
+      </mat-card-content>
+    }
+
+    @if (activeTab() === 'payment') {
+      <mat-card-header>
+        <mat-card-title>Add Payment Method</mat-card-title>
+        <mat-card-subtitle
+          >Securely save your card via Stripe</mat-card-subtitle
+        >
+      </mat-card-header>
+      <mat-card-content style="padding-top: 20px">
+        <!-- ── Saved Cards ── -->
+        @if (cardsLoading()) {
+          <div
+            style="display: flex; justify-content: center; padding: 12px 0 20px"
+          >
+            <mat-spinner diameter="28"></mat-spinner>
+          </div>
+        } @else if (savedCards().length > 0) {
+          <div style="margin-bottom: 20px">
+            <p
+              style="
+                font-size: 0.75rem;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.06em;
+                color: #666;
+                margin: 0 0 10px;
+              "
+            >
+              Saved Cards
+            </p>
+            @for (pm of savedCards(); track pm.id) {
+              <div
+                style="
+                  display: flex;
+                  align-items: center;
+                  gap: 12px;
+                  padding: 10px 14px;
+                  border: 1px solid #e0e0e0;
+                  border-radius: 8px;
+                  margin-bottom: 8px;
+                  background: #fafafa;
+                "
+              >
+                <mat-icon style="color: #555; flex-shrink: 0"
+                  >credit_card</mat-icon
+                >
+                <span style="font-weight: 600; text-transform: capitalize">{{
+                  pm.card?.brand
+                }}</span>
+                <span style="letter-spacing: 0.06em"
+                  >•••• {{ pm.card?.last4 }}</span
+                >
+                <span style="color: #888; font-size: 0.8rem; margin-left: auto">
+                  Expires {{ pm.card?.expMonth }}/{{ pm.card?.expYear }}
+                </span>
+              </div>
+            }
+            <mat-divider style="margin: 16px 0"></mat-divider>
+          </div>
+        }
+
+        @if (paymentLoading()) {
+          <div style="display: flex; justify-content: center; padding: 32px">
+            <mat-spinner></mat-spinner>
+          </div>
+        } @else {
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <p style="color: #555; font-size: 0.875rem; margin: 0">
+              Enter your card details below. Your information is handled
+              securely by Stripe. Use test card
+              <strong>4242 4242 4242 4242</strong>, any future date and any CVC.
+            </p>
+            <div>
+              <label
+                style="
+                  font-size: 0.75rem;
+                  color: #666;
+                  display: block;
+                  margin-bottom: 6px;
+                "
+                >Card details</label
+              >
+              <div id="stripe-card-element" #cardElementRef></div>
+              @if (cardError) {
+                <p style="color: #d32f2f; font-size: 0.75rem; margin: 6px 0 0">
+                  {{ cardError }}
+                </p>
+              }
+            </div>
+            @if (paymentSuccess) {
+              <p style="color: #388e3c; font-size: 0.875rem; margin: 0">
+                ✓ Payment method saved successfully!
+              </p>
+            }
+            @if (paymentError) {
+              <p style="color: #d32f2f; font-size: 0.875rem; margin: 0">
+                {{ paymentError }}
+              </p>
+            }
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="confirmCard()"
+              [disabled]="confirmingCard()"
+              style="height: 48px"
+            >
+              @if (confirmingCard()) {
+                <mat-spinner
+                  diameter="22"
+                  style="display: inline-block"
+                ></mat-spinner>
+              } @else {
+                <ng-container>
+                  <mat-icon>lock</mat-icon>
+                  Save Card
+                </ng-container>
+              }
+            </button>
+          </div>
+        }
+      </mat-card-content>
+    }
+  </mat-card>
+</div>
