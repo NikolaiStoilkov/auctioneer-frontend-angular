@@ -1,0 +1,329 @@
+<div class="page-wrapper">
+  <div class="top-row">
+    <mat-card class="balance-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon style="vertical-align: middle; margin-right: 6px"
+            >account_balance_wallet</mat-icon
+          >
+          My Balance
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        @if (balanceLoading()) {
+          <mat-spinner diameter="32" style="margin: 16px auto"></mat-spinner>
+        } @else if (balance()) {
+          <p class="balance-amount">
+            €{{ balance()!.balance | number: '1.2-2' }}
+          </p>
+          <p style="color: #757575; margin: 4px 0 0; font-size: 0.85rem">
+            Credits: €{{ balance()!.credits | number: '1.2-2' }}
+          </p>
+        } @else {
+          <p style="color: #9e9e9e; margin-top: 12px">
+            Could not load balance.
+          </p>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="add-card">
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon style="vertical-align: middle; margin-right: 6px"
+            >add_card</mat-icon
+          >
+          Add Credits
+        </mat-card-title>
+        <mat-card-subtitle
+          >Select an amount and pay securely via Stripe</mat-card-subtitle
+        >
+      </mat-card-header>
+      <mat-card-content style="padding-top: 16px">
+        @if (!paymentStep()) {
+          <div class="preset-grid">
+            @for (amount of presets; track amount) {
+              <button
+                mat-stroked-button
+                class="preset-btn"
+                [class.selected]="selectedPreset() === amount"
+                (click)="selectPreset(amount)"
+              >
+                €{{ amount }}
+              </button>
+            }
+          </div>
+          <form [formGroup]="form" (ngSubmit)="proceedToPayment()">
+            <mat-form-field appearance="outline" style="width: 100%">
+              <mat-label>Custom amount (€)</mat-label>
+              <mat-icon matPrefix>euro</mat-icon>
+              <input
+                matInput
+                type="number"
+                min="1"
+                formControlName="amount"
+                placeholder="e.g. 75"
+                (input)="selectedPreset.set(null)"
+              />
+              @if (form.get('amount')?.hasError('min')) {
+                <mat-error>Minimum amount is €1</mat-error>
+              }
+            </mat-form-field>
+            @if (intentError) {
+              <p style="color: #d32f2f; font-size: 0.875rem; margin: 0 0 8px">
+                {{ intentError }}
+              </p>
+            }
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="form.invalid || creatingIntent()"
+              style="width: 100%; height: 48px; font-size: 1rem"
+            >
+              @if (creatingIntent()) {
+                <mat-spinner
+                  diameter="24"
+                  style="display: inline-block"
+                ></mat-spinner>
+              } @else {
+                Continue to Payment
+              }
+            </button>
+          </form>
+        } @else {
+          <div style="display: flex; flex-direction: column; gap: 16px">
+            <div style="display: flex; align-items: center; gap: 8px">
+              <button mat-icon-button (click)="backToAmount()">
+                <mat-icon>arrow_back</mat-icon>
+              </button>
+              <span style="font-size: 1rem; font-weight: 500">
+                Pay €{{ form.value.amount | number: '1.2-2' }}
+              </span>
+            </div>
+
+            <!-- Payment method selection (shown only when a saved card exists) -->
+            @if (savedCards().length > 0) {
+              <div>
+                <p
+                  style="
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    text-transform: uppercase;
+                    letter-spacing: 0.06em;
+                    color: #666;
+                    margin: 0 0 8px;
+                  "
+                >
+                  Payment Method
+                </p>
+                <!-- Saved card option -->
+                <div
+                  (click)="selectSavedCard()"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 14px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    margin-bottom: 8px;
+                    transition:
+                      border-color 0.15s,
+                      background 0.15s;
+                  "
+                  [style.border]="
+                    useSavedCard() ? '2px solid #3f51b5' : '1px solid #e0e0e0'
+                  "
+                  [style.background]="useSavedCard() ? '#f3f4fe' : '#fafafa'"
+                >
+                  <mat-icon style="color: #3f51b5; flex-shrink: 0"
+                    >credit_card</mat-icon
+                  >
+                  <div style="flex: 1; font-size: 0.9rem">
+                    <span
+                      style="font-weight: 600; text-transform: capitalize"
+                      >{{ savedCards()[0].card?.brand }}</span
+                    >
+                    <span style="margin: 0 5px; letter-spacing: 0.05em"
+                      >•••• {{ savedCards()[0].card?.last4 }}</span
+                    >
+                  </div>
+                  <span
+                    style="font-size: 0.8rem; color: #888; white-space: nowrap"
+                  >
+                    Expires {{ savedCards()[0].card?.expMonth }}/{{
+                      savedCards()[0].card?.expYear
+                    }}
+                  </span>
+                </div>
+                <!-- New card option -->
+                <div
+                  (click)="switchToNewCard()"
+                  style="
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 12px 14px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    transition:
+                      border-color 0.15s,
+                      background 0.15s;
+                  "
+                  [style.border]="
+                    !useSavedCard() ? '2px solid #3f51b5' : '1px solid #e0e0e0'
+                  "
+                  [style.background]="!useSavedCard() ? '#f3f4fe' : '#fafafa'"
+                >
+                  <mat-icon style="color: #555; flex-shrink: 0"
+                    >add_card</mat-icon
+                  >
+                  <span style="font-size: 0.9rem">Use a different card</span>
+                </div>
+              </div>
+            }
+
+            <!-- Card element — shown only when entering a new card -->
+            @if (!useSavedCard() || savedCards().length === 0) {
+              @if (savedCards().length === 0) {
+                <p style="color: #555; font-size: 0.875rem; margin: 0">
+                  Use test card <strong>4242 4242 4242 4242</strong>, any future
+                  date and any CVC.
+                </p>
+              }
+              @if (stripeLoading()) {
+                <mat-spinner diameter="32" style="margin: 0 auto"></mat-spinner>
+              }
+              <div>
+                <label
+                  style="
+                    font-size: 0.75rem;
+                    color: #666;
+                    display: block;
+                    margin-bottom: 6px;
+                  "
+                  >Card details</label
+                >
+                <div id="stripe-payment-element"></div>
+                @if (cardError) {
+                  <p
+                    style="color: #d32f2f; font-size: 0.75rem; margin: 6px 0 0"
+                  >
+                    {{ cardError }}
+                  </p>
+                }
+              </div>
+            }
+
+            @if (successMsg) {
+              <p style="color: #388e3c; font-size: 0.9rem; margin: 0">
+                <mat-icon style="font-size: 16px; vertical-align: middle"
+                  >check_circle</mat-icon
+                >
+                {{ successMsg }}
+              </p>
+            }
+            @if (errorMsg) {
+              <p style="color: #d32f2f; font-size: 0.9rem; margin: 0">
+                {{ errorMsg }}
+              </p>
+            }
+            <button
+              mat-raised-button
+              color="primary"
+              (click)="confirmPayment()"
+              [disabled]="submitting() || stripeLoading()"
+              style="width: 100%; height: 48px; font-size: 1rem"
+            >
+              @if (submitting()) {
+                <mat-spinner
+                  diameter="24"
+                  style="display: inline-block"
+                ></mat-spinner>
+              } @else {
+                <ng-container>
+                  <mat-icon>lock</mat-icon>
+                  Pay €{{ form.value.amount | number: '1.2-2' }}
+                </ng-container>
+              }
+            </button>
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <mat-card class="history-card">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon style="vertical-align: middle; margin-right: 6px"
+          >history</mat-icon
+        >
+        Transaction History
+      </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      @if (txLoading()) {
+        <div style="display: flex; justify-content: center; padding: 32px">
+          <mat-spinner></mat-spinner>
+        </div>
+      } @else if (transactions().length === 0) {
+        <div style="text-align: center; padding: 32px; color: #9e9e9e">
+          <mat-icon style="font-size: 48px; width: 48px; height: 48px"
+            >receipt_long</mat-icon
+          >
+          <p>No transactions yet.</p>
+        </div>
+      } @else {
+        <table mat-table [dataSource]="transactions()" style="width: 100%">
+          <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef>Date</th>
+            <td mat-cell *matCellDef="let t">
+              {{ t.createdAt | date: 'dd MMM yyyy, HH:mm' }}
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="type">
+            <th mat-header-cell *matHeaderCellDef>Type</th>
+            <td mat-cell *matCellDef="let t">
+              <span
+                class="type-chip"
+                [class.chip-purchase]="t.type === 'PURCHASE'"
+                [class.chip-debit]="t.type === 'DEBIT'"
+                [class.chip-refund]="t.type === 'REFUND'"
+                style="padding: 3px 10px; border-radius: 12px"
+              >
+                {{ t.type }}
+              </span>
+            </td>
+          </ng-container>
+          <ng-container matColumnDef="description">
+            <th mat-header-cell *matHeaderCellDef>Description</th>
+            <td mat-cell *matCellDef="let t">{{ t.description }}</td>
+          </ng-container>
+          <ng-container matColumnDef="amount">
+            <th mat-header-cell *matHeaderCellDef style="text-align: right">
+              Amount
+            </th>
+            <td mat-cell *matCellDef="let t" style="text-align: right">
+              <span [style.color]="t.type === 'DEBIT' ? '#d32f2f' : '#2e7d32'">
+                {{ t.type === 'DEBIT' ? '-' : '+' }}€{{
+                  t.amount | number: '1.2-2'
+                }}
+              </span>
+            </td>
+          </ng-container>
+          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+        <mat-paginator
+          [length]="totalElements()"
+          [pageSize]="pageSize"
+          [pageIndex]="pageIndex()"
+          [pageSizeOptions]="[5, 10, 25]"
+          (page)="onPageChange($event)"
+        ></mat-paginator>
+      }
+    </mat-card-content>
+  </mat-card>
+</div>

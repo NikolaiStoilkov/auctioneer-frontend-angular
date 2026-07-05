@@ -1,0 +1,30 @@
+<div class="toast-container">
+  @for (toast of ns.toasts(); track toast.id) {
+    <div class="toast">
+      <mat-icon class="toast-icon">gavel</mat-icon>
+      <div class="toast-body">
+        <div class="toast-title">
+          {{
+            toast.type === 'OUTBID'
+              ? "You've been outbid!"
+              : 'New bid on your auction'
+          }}
+        </div>
+        <div class="toast-msg">
+          <strong>{{ toast.latestBidderUsername }}</strong> bid
+          <strong>{{ toast.currentBidPrice | currency }}</strong> on
+          <a [routerLink]="['/ads', toast.adId]" class="toast-link">{{
+            toast.adTitle
+          }}</a>
+        </div>
+      </div>
+      <button
+        mat-icon-button
+        class="toast-close"
+        (click)="ns.dismissToast(toast.id)"
+      >
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+  }
+</div>

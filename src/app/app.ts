@@ -1,12 +1,21 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { NavbarComponent } from './presentation/components/navbar/navbar.component';
+import { ToastNotificationsComponent } from './presentation/components/toast-notifications/toast-notifications.component';
+import { NotificationService } from './application/notification/notification.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
+  standalone: true,
+  imports: [RouterOutlet, NavbarComponent, ToastNotificationsComponent],
+  template: `
+    <app-navbar></app-navbar>
+    <router-outlet></router-outlet>
+    <app-toast-notifications></app-toast-notifications>
+  `,
+  styles: [],
 })
 export class App {
-  protected readonly title = signal('frontend');
+  // Eagerly instantiate so SSE connects as soon as the app loads for logged-in users
+  private _ns = inject(NotificationService);
 }

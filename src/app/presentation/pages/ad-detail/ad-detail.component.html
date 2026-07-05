@@ -1,0 +1,247 @@
+<div style="max-width: 840px; margin: 0 auto; padding: 24px 16px">
+  @if (loading()) {
+    <div style="display: flex; justify-content: center; padding: 48px">
+      <mat-spinner></mat-spinner>
+    </div>
+  } @else if (ad()) {
+    <!-- ── Main Ad Card ── -->
+    <mat-card>
+      @if (ad()!.image) {
+        <img
+          mat-card-image
+          [src]="ad()!.image"
+          [alt]="ad()!.title"
+          style="max-height: 380px; object-fit: cover"
+        />
+      }
+      <mat-card-header style="padding: 16px 16px 0">
+        <mat-card-title style="font-size: 22px">{{
+          ad()!.title
+        }}</mat-card-title>
+        <mat-card-subtitle>
+          <mat-icon style="font-size: 14px; vertical-align: middle"
+            >place</mat-icon
+          >
+          {{ ad()!.location }}
+        </mat-card-subtitle>
+      </mat-card-header>
+
+      <mat-card-content style="padding: 16px">
+        <p style="color: #444; line-height: 1.6">{{ ad()!.description }}</p>
+
+        <mat-divider style="margin: 16px 0"></mat-divider>
+
+        <!-- ── Status chip ── -->
+        <div
+          style="
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+          "
+        >
+          <mat-chip-set>
+            <mat-chip
+              [style.background]="statusColor(ad()!.status)"
+              style="font-weight: 600"
+            >
+              {{ ad()!.status }}
+            </mat-chip>
+          </mat-chip-set>
+          @if (sseConnected()) {
+            <span class="live-badge"> <span class="live-dot"></span>LIVE </span>
+          }
+        </div>
+
+        <!-- ── Bid Panel ── -->
+        <div class="bid-panel" [class.live]="sseConnected()">
+          <div class="price-row">
+            <div class="price-box">
+              <div class="label">Starting Price</div>
+              <div class="value">${{ ad()!.startingBidPrice }}</div>
+            </div>
+            <div class="price-box highlight">
+              <div class="label">Current Bid</div>
+              <div class="value">${{ currentBid() }}</div>
+            </div>
+            <div class="price-box">
+              <div class="label">Bid Step</div>
+              <div class="value">${{ ad()!.bidStep }}</div>
+            </div>
+            @if (ad()!.status === 'ACTIVE') {
+              <div class="price-box next">
+                <div class="label">Your Bid Will Be</div>
+                <div class="value">${{ nextBid() }}</div>
+              </div>
+            }
+          </div>
+
+          @if (latestBidderUsername()) {
+            <div style="font-size: 13px; color: #555; margin-bottom: 12px">
+              <mat-icon style="font-size: 14px; vertical-align: middle"
+                >person</mat-icon
+              >
+              Highest bidder: <strong>{{ latestBidderUsername() }}</strong>
+            </div>
+          }
+
+          <!-- Place Bid Button (logged-in & ACTIVE) -->
+          @if (isOwner()) {
+            <p style="color: #777; margin: 0">
+              <mat-icon style="font-size: 16px; vertical-align: middle"
+                >info</mat-icon
+              >
+              This is your ad — you can't bid on it.
+            </p>
+          } @else if (auth.isLoggedIn() && ad()!.status === 'ACTIVE') {
+            <div
+              style="
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                flex-wrap: wrap;
+              "
+            >
+              <button
+                mat-raised-button
+                color="primary"
+                [disabled]="bidding() || isHighestBidder()"
+                (click)="placeBid()"
+                style="padding: 0 28px; height: 44px; font-size: 15px"
+              >
+                @if (bidding()) {
+                  <mat-spinner
+                    diameter="20"
+                    style="display: inline-block"
+                  ></mat-spinner>
+                } @else {
+                  <ng-container>
+                    <mat-icon>gavel</mat-icon>&nbsp;Place Bid — ${{ nextBid() }}
+                  </ng-container>
+                }
+              </button>
+              @if (isHighestBidder()) {
+                <span
+                  style="color: #2e7d32; font-weight: 500"
+                >
+                  <mat-icon style="font-size: 16px; vertical-align: middle"
+                    >emoji_events</mat-icon
+                  >
+                  You're the highest bidder — wait to be outbid.
+                </span>
+              } @else if (bidMsg()) {
+                <span
+                  [style.color]="bidError() ? '#c62828' : '#2e7d32'"
+                  style="font-weight: 500"
+                >
+                  <mat-icon style="font-size: 16px; vertical-align: middle">
+                    {{ bidError() ? 'error_outline' : 'check_circle_outline' }}
+                  </mat-icon>
+                  {{ bidMsg() }}
+                </span>
+              }
+            </div>
+          } @else if (!auth.isLoggedIn() && ad()!.status === 'ACTIVE') {
+            <p style="color: #777; margin: 0">
+              <a routerLink="/sign-in">Sign in</a> to place a bid.
+            </p>
+          }
+        </div>
+
+        <!-- ── Bid History ── -->
+        @if (bidHistory().length > 0) {
+          <mat-divider style="margin: 16px 0"></mat-divider>
+          <h3 style="margin: 0 0 12px">
+            <mat-icon style="vertical-align: middle">history</mat-icon>
+            Bid History
+          </h3>
+          <div>
+            @for (entry of bidHistory(); track entry.timestamp) {
+              <div class="bid-history-item">
+                <span class="bid-winner">
+                  <mat-icon style="font-size: 14px; vertical-align: middle"
+                    >person</mat-icon
+                  >
+                  {{ entry.latestBidderUsername }}
+                </span>
+                <span class="bid-amount">${{ entry.currentBidPrice }}</span>
+                <span style="font-size: 12px; color: #999">
+                  {{ entry.timestamp | date: 'short' }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </mat-card-content>
+    </mat-card>
+
+    <!-- ── Comments Card ── -->
+    <mat-card style="margin-top: 24px">
+      <mat-card-header style="padding: 16px 16px 0">
+        <mat-card-title>
+          <mat-icon style="vertical-align: middle">comment</mat-icon>
+          Comments
+        </mat-card-title>
+      </mat-card-header>
+      <mat-card-content style="padding: 16px">
+        @for (comment of comments(); track comment.id) {
+          <div class="comment-item">
+            <div class="comment-avatar">
+              {{ (comment.authorUsername ?? 'U').charAt(0).toUpperCase() }}
+            </div>
+            <div class="comment-body">
+              <div class="comment-meta">
+                <span class="comment-username">{{
+                  comment.authorUsername ?? 'User #' + comment.authorId
+                }}</span>
+                @if (comment.createdAt) {
+                  <span class="comment-time">{{
+                    comment.createdAt | date: 'MMM d, y · h:mm a'
+                  }}</span>
+                }
+              </div>
+              <p class="comment-text">{{ comment.content }}</p>
+            </div>
+          </div>
+        }
+        @if (comments().length === 0) {
+          <p style="color: #aaa; text-align: center; padding: 16px 0">
+            No comments yet.
+          </p>
+        }
+        @if (auth.isLoggedIn()) {
+          <form
+            [formGroup]="commentForm"
+            (ngSubmit)="addComment()"
+            style="
+              margin-top: 16px;
+              display: flex;
+              gap: 12px;
+              align-items: flex-start;
+            "
+          >
+            <mat-form-field appearance="outline" style="flex: 1">
+              <mat-label>Add a comment</mat-label>
+              <input matInput formControlName="content" />
+            </mat-form-field>
+            <button
+              mat-raised-button
+              color="primary"
+              type="submit"
+              [disabled]="commentForm.invalid"
+              style="margin-top: 4px"
+            >
+              Post
+            </button>
+          </form>
+        } @else {
+          <p style="color: #777; margin: 16px 0 0">
+            <a routerLink="/sign-in">Sign in</a> to leave a comment.
+          </p>
+        }
+      </mat-card-content>
+    </mat-card>
+  } @else {
+    <p style="text-align: center; color: #777; padding: 48px">Ad not found.</p>
+  }
+</div>

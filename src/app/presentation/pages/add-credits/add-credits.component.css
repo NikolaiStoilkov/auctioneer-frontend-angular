@@ -1,0 +1,74 @@
+.page-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 16px;
+  gap: 24px;
+}
+.top-row {
+  display: flex;
+  gap: 24px;
+  width: 100%;
+  max-width: 900px;
+  flex-wrap: wrap;
+}
+.balance-card {
+  flex: 1;
+  min-width: 200px;
+}
+.add-card {
+  flex: 2;
+  min-width: 320px;
+}
+.history-card {
+  width: 100%;
+  max-width: 900px;
+}
+.balance-amount {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #3f51b5;
+  margin: 8px 0 0;
+}
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.preset-btn {
+  height: 52px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+.preset-btn.selected {
+  background: #3f51b5;
+  color: #fff;
+}
+#stripe-payment-element {
+  border: 1px solid rgba(0, 0, 0, 0.23);
+  border-radius: 4px;
+  padding: 14px 12px;
+  background: #fff;
+  transition: border-color 0.2s;
+}
+#stripe-payment-element.focused {
+  border-color: #3f51b5;
+  border-width: 2px;
+}
+.type-chip {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.chip-purchase {
+  background: #e8f5e9 !important;
+  color: #2e7d32 !important;
+}
+.chip-debit {
+  background: #fce4ec !important;
+  color: #c62828 !important;
+}
+.chip-refund {
+  background: #e3f2fd !important;
+  color: #1565c0 !important;
+}

@@ -1,0 +1,137 @@
+.bid-panel {
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f4fd 100%);
+  border: 2px solid #1976d2;
+  border-radius: 12px;
+  padding: 20px;
+  margin: 16px 0;
+}
+.bid-panel.live {
+  border-color: #43a047;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8f5e9 100%);
+}
+.price-row {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.price-box {
+  text-align: center;
+  padding: 10px 16px;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  min-width: 100px;
+}
+.price-box .label {
+  font-size: 11px;
+  color: #777;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.price-box .value {
+  font-size: 20px;
+  font-weight: 700;
+  color: #1976d2;
+  margin-top: 2px;
+}
+.price-box.highlight .value {
+  color: #e65100;
+}
+.price-box.next .value {
+  color: #43a047;
+}
+.live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #e8f5e9;
+  color: #2e7d32;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid #a5d6a7;
+}
+.live-dot {
+  width: 8px;
+  height: 8px;
+  background: #43a047;
+  border-radius: 50%;
+  animation: pulse 1.4s infinite;
+}
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.3;
+  }
+}
+.bid-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 12px;
+  border-radius: 6px;
+  background: white;
+  margin-bottom: 6px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+}
+.bid-history-item:first-child {
+  background: #e3f2fd;
+  font-weight: 600;
+}
+.bid-winner {
+  color: #1565c0;
+}
+.bid-amount {
+  font-weight: 700;
+  color: #1976d2;
+}
+.comment-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid #f0f0f0;
+  align-items: flex-start;
+}
+.comment-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #3f51b5;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.comment-body {
+  flex: 1;
+}
+.comment-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.comment-username {
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #333;
+}
+.comment-time {
+  font-size: 0.75rem;
+  color: #999;
+}
+.comment-text {
+  margin: 0;
+  font-size: 0.875rem;
+  color: #444;
+  line-height: 1.5;
+}

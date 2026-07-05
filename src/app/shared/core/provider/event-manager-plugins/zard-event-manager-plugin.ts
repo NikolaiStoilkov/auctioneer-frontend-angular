@@ -27,7 +27,7 @@ export class ZardEventManagerPlugin extends EventManagerPlugin {
   #keywords = ['prevent', 'stop', 'stop-immediate', 'prevent-with-stop'];
 
   override supports(eventName: string): boolean {
-    return this.#keywords.some(keyword => eventName.endsWith(`.${keyword}`));
+    return this.#keywords.some((keyword) => eventName.endsWith(`.${keyword}`));
   }
 
   override addEventListener(
@@ -37,15 +37,21 @@ export class ZardEventManagerPlugin extends EventManagerPlugin {
     options?: ListenerOptions,
     // eslint-disable-next-line
   ): Function {
-    const { event, keyword, keys } = this.#provideEventFrom(eventName, this.#keywords);
+    const { event, keyword, keys } = this.#provideEventFrom(
+      eventName,
+      this.#keywords,
+    );
     return this.manager.addEventListener(
       element,
       event,
       (event: Event) => {
         const isKeyboardEvent = event instanceof KeyboardEvent;
-        const isElementDisabled = element.getAttribute('aria-disabled') === 'true';
+        const isElementDisabled =
+          element.getAttribute('aria-disabled') === 'true';
         const shouldApplyModifier =
-          (!keys.length || (isKeyboardEvent && keys.includes(event.key.toLowerCase()))) && !isElementDisabled;
+          (!keys.length ||
+            (isKeyboardEvent && keys.includes(event.key.toLowerCase()))) &&
+          !isElementDisabled;
 
         if (shouldApplyModifier) {
           switch (keyword) {
@@ -70,7 +76,10 @@ export class ZardEventManagerPlugin extends EventManagerPlugin {
     );
   }
 
-  #provideEventFrom(eventName: string, keywords: string[]): { event: string; keyword: string; keys: string[] } {
+  #provideEventFrom(
+    eventName: string,
+    keywords: string[],
+  ): { event: string; keyword: string; keys: string[] } {
     const eventNameSubstrings = eventName.split('.');
     let event = '';
     let keys: string[] = [];
@@ -97,7 +106,7 @@ export class ZardEventManagerPlugin extends EventManagerPlugin {
     const stringList = substring.substring(1, substring.length - 1);
     return stringList
       .split(',')
-      .map(raw => {
+      .map((raw) => {
         const s = raw.toLowerCase().trim();
         return s === 'space' ? ' ' : s;
       })
