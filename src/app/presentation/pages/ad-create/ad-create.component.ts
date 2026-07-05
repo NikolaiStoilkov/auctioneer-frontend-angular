@@ -7,7 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { AdService } from '@/application/ads/ad.service';
 import { AuthService } from '@/application/auth/auth.service';
-
+//
 @Component({
   selector: 'app-ad-create',
   standalone: true,
