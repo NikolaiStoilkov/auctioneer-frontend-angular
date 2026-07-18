@@ -1,7 +1,7 @@
 import { Observable } from 'rxjs';
 import { Comment } from '../domain/comment.model';
 
-export abstract class CommentPort {
+export abstract class ICommentService {
   abstract getByAdId(adId: number): Observable<Comment[]>;
   abstract create(adId: number, comment: Comment): Observable<void>;
   abstract edit(comment: Comment): Observable<void>;

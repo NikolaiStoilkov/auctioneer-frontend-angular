@@ -8,7 +8,7 @@ export interface PagedResponse<T> {
   number: number;
 }
 
-export abstract class WalletPort {
+export abstract class IWalletService {
   abstract getBalance(): Observable<WalletBalance>;
   abstract createPaymentIntent(
     amount: number,

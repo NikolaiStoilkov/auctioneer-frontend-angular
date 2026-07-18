@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { PagedResponse } from '../../core/ports/wallet.port';
+import { PagedResponse } from '../../core/services/IWalletService';
 import { WalletBalance, CreditTransaction } from '../../core/domain/wallet.model';
 import { HttpClient } from '@angular/common/http';
 import * as variables from '@env/environment.development';
