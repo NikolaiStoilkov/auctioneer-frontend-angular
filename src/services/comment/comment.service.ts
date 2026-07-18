@@ -1,29 +1,59 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 
-import * as variables from '@env/environment.development';
-
 import { Comment } from '../../core/domain/comment.model';
+import { COMMENTS_API } from '../../core/config/comments.api';
 
+/**
+ * HTTP client for the ad comments REST API.
+ *
+ * Supports listing the comments of an ad and creating, editing,
+ * and deleting individual comments.
+ */
 @Injectable({ providedIn: 'root' })
 export class CommentService {
-  private base = `${variables.environment.API_URL}/api/comments`;
+  private api = COMMENTS_API;
 
   constructor(private http: HttpClient) {}
 
+  /**
+   * Fetches all comments posted on the given ad.
+   *
+   * @param adId Id of the ad whose comments to fetch.
+   * @returns Observable emitting the ad's comments.
+   */
   getByAdId(adId: number) {
-    return this.http.get<Comment[]>(`${this.base}/${adId}`);
+    return this.http.get<Comment[]>(this.api.byAdId(adId));
   }
 
+  /**
+   * Posts a new comment on the given ad.
+   *
+   * @param adId Id of the ad to comment on.
+   * @param comment Comment payload to create.
+   * @returns Observable completing when the comment has been created.
+   */
   create(adId: number, comment: Comment) {
-    return this.http.post(`${this.base}/create/${adId}`, comment);
+    return this.http.post(this.api.create(adId), comment);
   }
 
+  /**
+   * Updates an existing comment.
+   *
+   * @param comment Comment payload including its id.
+   * @returns Observable completing when the comment has been updated.
+   */
   edit(comment: Comment) {
-    return this.http.put(`${this.base}/edit`, comment);
+    return this.http.put(this.api.edit, comment);
   }
 
+  /**
+   * Deletes a comment.
+   *
+   * @param id Id of the comment to delete.
+   * @returns Observable completing when the comment has been deleted.
+   */
   delete(id: number) {
-    return this.http.delete<void>(`${this.base}/delete/${id}`);
+    return this.http.delete<void>(this.api.delete(id));
   }
 }

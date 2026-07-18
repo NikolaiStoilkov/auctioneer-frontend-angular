@@ -7,6 +7,13 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth/auth.service';
 
+/**
+ * Registration page.
+ *
+ * Collects credentials, personal details, and address, registers the
+ * user via {@link AuthService.signUp} (which also signs them in), and
+ * redirects to the home page on success.
+ */
 @Component({
   selector: 'app-sign-up',
   standalone: true,
@@ -26,8 +33,10 @@ export class SignUpComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  /** Error message shown when registration fails. */
   error = '';
 
+  /** Registration form: credentials, personal details, and address. */
   form = this.formBuilder.group({
     username: ['', [Validators.required, Validators.minLength(3)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
@@ -46,6 +55,7 @@ export class SignUpComponent {
     ],
   });
 
+  /** Registers the user with the `USER` role and navigates home on success. */
   onSubmit(): void {
     if (this.form.invalid) {
       return;

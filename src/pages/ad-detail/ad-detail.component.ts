@@ -21,7 +21,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
-import * as variables from '@env/environment.development';
+import { ADS_API } from '../../core/config/ads.api';
 
 import { Ad, BidResponse } from '../../core/domain/ad.model';
 import { Comment } from '../../core/domain/comment.model';
@@ -32,6 +32,14 @@ import { AuthService } from '../../services/auth/auth.service';
 import { BalanceService } from '../../services/wallet/balance.service';
 
 
+/**
+ * Ad detail page — the live auction view for a single ad.
+ *
+ * Loads the ad and its comments, subscribes to the ad's SSE bid stream
+ * for real-time price updates, and lets eligible users place bids and
+ * post comments. Owners and the current highest bidder are blocked
+ * from bidding.
+ */
 @Component({
   selector: 'app-ad-detail',
   standalone: true,
@@ -61,21 +69,33 @@ export class AdDetailComponent implements OnInit, OnDestroy {
   authService = inject(AuthService);
   private formBuilder = inject(FormBuilder);
 
+  /** The displayed ad, or `null` while loading or on error. */
   ad = signal<Ad | null>(null);
+  /** Comments posted on the ad. */
   comments = signal<Comment[]>([]);
+  /** `true` while the ad is being fetched. */
   loading = signal(true);
+  /** `true` while a bid request is in flight. */
   bidding = signal(false);
+  /** Success or error feedback for the last bid attempt. */
   bidMessage = signal('');
+  /** Whether {@link bidMessage} represents an error. */
   bidError = signal(false);
+  /** Whether the live bid SSE stream is currently connected. */
   sseConnected = signal(false);
+  /** Username of the most recent bidder. */
   latestBidderUsername = signal('');
+  /** User id of the most recent bidder, or `null` when there are no bids. */
   latestBidderUserId = signal<number | null>(null);
+  /** The last (up to 10) bids, newest first. */
   bidHistory = signal<BidResponse[]>([]);
 
+  /** The current price of the auction, falling back to the starting price. */
   currentBid = computed(
     () => this.ad()?.currentBidPrice ?? this.ad()?.startingBidPrice ?? 0
   );
 
+  /** The price the next bid will be placed at (`current price + bid step`). */
   nextBid = computed(() => {
     const currentAd = this.ad();
     if (!currentAd) {
@@ -87,19 +107,22 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     );
   });
 
-  // The logged-in user is already the highest bidder — they cannot bid again
-  // until someone outbids them.
+  /**
+   * Whether the logged-in user is already the highest bidder — they cannot
+   * bid again until someone outbids them.
+   */
   isHighestBidder = computed(() => {
     const userId = this.authService.getUserIdFromToken();
     return userId != null && this.latestBidderUserId() === userId;
   });
 
-  // Owners cannot bid on their own ads.
+  /** Whether the logged-in user owns this ad. Owners cannot bid on their own ads. */
   isOwner = computed(() => {
     const userId = this.authService.getUserIdFromToken();
     return userId != null && this.ad()?.authorId === userId;
   });
 
+  /** Form for posting a new comment (max 100 characters). */
   commentForm = this.formBuilder.group({
     content: ['', [Validators.required, Validators.maxLength(100)]]
   });
@@ -118,6 +141,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     this.disconnectSse();
   }
 
+  /** Fetches the ad and seeds the bid history from its last bidders. */
   private loadAd (): void {
     this.adService.getById(this.adId).subscribe({
       next: (ad) => {
@@ -129,6 +153,12 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Builds the initial bid history from the ad's `lastBidders`, sorted
+   * newest first and capped at 10 entries, and derives the latest bidder.
+   *
+   * @param ad The freshly loaded ad.
+   */
   private initBidHistoryFromAd (ad: Ad): void {
     if (!ad.lastBidders?.length) {
       return;
@@ -159,6 +189,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Fetches the ad's comments. */
   private loadComments (): void {
     this.commentService.getByAdId(this.adId).subscribe({
       next: (loadedComments) => this.comments.set(loadedComments)
@@ -167,8 +198,14 @@ export class AdDetailComponent implements OnInit, OnDestroy {
 
   // ─── SSE live updates ────────────────────────────────────────────────────────
 
+  /**
+   * Opens the ad's SSE bid stream and applies incoming bid events.
+   *
+   * Events arrive outside Angular's zone, so updates are re-entered
+   * via `NgZone.run` to trigger change detection.
+   */
   private connectSse (): void {
-    const url = `${variables.environment.API_URL}/api/ads/${this.adId}/stream`;
+    const url = ADS_API.bidStream(this.adId);
     try {
       this.sseSource = new EventSource(url);
 
@@ -190,11 +227,18 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     }
   }
 
+  /** Closes the SSE bid stream. */
   private disconnectSse (): void {
     this.sseSource?.close();
     this.sseSource = null;
   }
 
+  /**
+   * Applies a bid to the local state: updates the ad's price, the latest
+   * bidder, and prepends the bid to the history (deduplicated, capped at 10).
+   *
+   * @param bidUpdate Bid received from the SSE stream or a bid response.
+   */
   private applyBidUpdate (bidUpdate: BidResponse): void {
     this.ad.update((currentAd) =>
       currentAd
@@ -220,6 +264,14 @@ export class AdDetailComponent implements OnInit, OnDestroy {
 
   // ─── Actions ─────────────────────────────────────────────────────────────────
 
+  /**
+   * Places a bid on the ad for the logged-in user.
+   *
+   * No-op while a bid is in flight, or when the user is logged out,
+   * owns the ad, or is already the highest bidder. On success the local
+   * state and wallet balance are refreshed; on failure the server's
+   * error message is shown.
+   */
   placeBid (): void {
     if (!this.ad() || this.bidding()) {
       return;
@@ -272,6 +324,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  /** Posts the comment from {@link commentForm}, then resets the form and reloads the comments. */
   addComment (): void {
     if (this.commentForm.invalid || !this.ad()) {
       return;
@@ -297,6 +350,12 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     });
   }
 
+  /**
+   * Maps an ad status to its chip background color.
+   *
+   * @param status Ad status (`ACTIVE`, `SOLD`, or other).
+   * @returns A CSS color: green for active, red for sold, yellow otherwise.
+   */
   statusColor (status?: string): string {
     if (status === 'ACTIVE') {
       return '#c8e6c9';

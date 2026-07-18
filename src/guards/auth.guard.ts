@@ -2,6 +2,12 @@ import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '../services/auth/auth.service';
 
+/**
+ * Route guard that restricts access to authenticated users.
+ *
+ * Allows activation while {@link AuthService.isLoggedIn} is `true`;
+ * otherwise redirects to the sign-in page.
+ */
 export const authGuard: CanActivateFn = () => {
   const authService = inject(AuthService);
   const router = inject(Router);

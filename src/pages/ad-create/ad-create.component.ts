@@ -8,6 +8,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { AdService } from '../../services/ads/ad.service';
 import { AuthService } from '../../services/auth/auth.service';
 
+/**
+ * Page for creating a new auction ad.
+ *
+ * Validates the ad form and submits it via {@link AdService}; on
+ * success the user is redirected to their ads list.
+ */
 @Component({
   selector: 'app-ad-create',
   standalone: true,
@@ -27,8 +33,10 @@ export class AdCreateComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  /** Error message shown when creation fails. */
   error = '';
 
+  /** New-ad form: title, description, location, starting price, bid step, optional image. */
   form = this.formBuilder.group({
     title: [
       '',
@@ -54,6 +62,7 @@ export class AdCreateComponent {
     image: [''],
   });
 
+  /** Creates the ad from the form values and navigates to "My ads" on success. */
   onSubmit(): void {
     if (this.form.invalid) {
       return;

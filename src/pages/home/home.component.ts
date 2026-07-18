@@ -8,6 +8,12 @@ import { Ad, AdFilter } from '../../core/domain/ad.model';
 import { AdService } from '../../services/ads/ad.service';
 import { NotificationService } from '../../services/notification/notification.service';
 
+/**
+ * Home page listing all active auctions.
+ *
+ * Loads ads page by page and overlays live bid prices from the global
+ * SSE stream exposed by {@link NotificationService}.
+ */
 @Component({
   selector: 'app-home',
   standalone: true,
@@ -34,6 +40,7 @@ export class HomeComponent implements OnInit {
     this.load();
   }
 
+  /** Fetches the current page of active ads. */
   load(): void {
     this.loading.set(true);
 
@@ -53,6 +60,7 @@ export class HomeComponent implements OnInit {
     });
   }
 
+  /** Navigates to the previous page, if any, and reloads. */
   prevPage(): void {
     if (this.page() > 1) {
       this.page.update((currentPage) => currentPage - 1);
@@ -61,11 +69,19 @@ export class HomeComponent implements OnInit {
     }
   }
 
+  /** Navigates to the next page and reloads. */
   nextPage(): void {
     this.page.update((currentPage) => currentPage + 1);
     this.load();
   }
 
+  /**
+   * Returns the ad's current price formatted with two decimals,
+   * preferring the live SSE price over the loaded snapshot.
+   *
+   * @param ad Ad to price.
+   * @returns The display price, e.g. `"120.00"`.
+   */
   livePrice(ad: Ad): string {
     const price =
       this.notificationService.liveAdPrices()[ad.id!] ??
@@ -75,6 +91,12 @@ export class HomeComponent implements OnInit {
     return Number(price).toFixed(2);
   }
 
+  /**
+   * Maps an ad status to its chip background color.
+   *
+   * @param status Ad status (`ACTIVE`, `SOLD`, or other).
+   * @returns A CSS color: green for active, red for sold, yellow otherwise.
+   */
   statusColor(status?: string): string {
     if (status === 'ACTIVE') {
       return '#c8e6c9';

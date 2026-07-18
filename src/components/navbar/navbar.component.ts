@@ -8,6 +8,14 @@ import { AuthService } from '../../services/auth/auth.service';
 import { NotificationService } from '../../services/notification/notification.service';
 import { BalanceService } from '../../services/wallet/balance.service';
 
+/**
+ * Top navigation bar.
+ *
+ * Shows the main navigation links and, for logged-in users, the wallet
+ * balance and the unread notification badge. The template binds directly
+ * to the injected {@link AuthService}, {@link NotificationService},
+ * and {@link BalanceService}.
+ */
 @Component({
   selector: 'app-navbar',
   standalone: true,

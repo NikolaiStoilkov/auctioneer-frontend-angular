@@ -7,6 +7,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { AuthService } from '../../services/auth/auth.service';
 
+/**
+ * Sign-in page.
+ *
+ * Submits the credentials via {@link AuthService.signIn} and redirects
+ * to the home page on success.
+ */
 @Component({
   selector: 'app-sign-in',
   standalone: true,
@@ -26,13 +32,16 @@ export class SignInComponent {
   private authService = inject(AuthService);
   private router = inject(Router);
 
+  /** Error message shown when authentication fails. */
   error = '';
 
+  /** Credentials form: username and password. */
   form = this.formBuilder.group({
     username: ['', Validators.required],
     password: ['', Validators.required],
   });
 
+  /** Signs the user in and navigates home on success. */
   onSubmit(): void {
     if (this.form.invalid) {
       return;

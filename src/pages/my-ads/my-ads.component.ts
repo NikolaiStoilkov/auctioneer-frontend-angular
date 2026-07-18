@@ -8,6 +8,10 @@ import { Ad } from '../../core/domain/ad.model';
 import { AdService } from '../../services/ads/ad.service';
 import { NotificationService } from '../../services/notification/notification.service';
 
+/**
+ * "My ads" page listing the auctions created by the logged-in user,
+ * with live prices from the global SSE stream.
+ */
 @Component({
   selector: 'app-my-ads',
   standalone: true,
@@ -39,6 +43,13 @@ export class MyAdsComponent implements OnInit {
     });
   }
 
+  /**
+   * Returns the ad's current price formatted with two decimals,
+   * preferring the live SSE price over the loaded snapshot.
+   *
+   * @param ad Ad to price.
+   * @returns The display price, e.g. `"120.00"`.
+   */
   livePrice(ad: Ad): string {
     const price =
       this.notificationService.liveAdPrices()[ad.id!] ??
@@ -48,6 +59,12 @@ export class MyAdsComponent implements OnInit {
     return Number(price).toFixed(2);
   }
 
+  /**
+   * Maps an ad status to its chip background color.
+   *
+   * @param status Ad status (`ACTIVE`, `SOLD`, or other).
+   * @returns A CSS color: green for active, red for sold, yellow otherwise.
+   */
   statusColor(status?: string): string {
     if (status === 'ACTIVE') {
       return '#c8e6c9';

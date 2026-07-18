@@ -21,8 +21,17 @@ import { StripeService } from '../../services/stripe/stripe.service';
 import { WalletBalance, CreditTransaction } from '../../core/domain/wallet.model';
 import { PaymentMethodResponse } from '../../core/domain/stripe.model';
 
+/** Quick-select top-up amounts offered on the page. */
 const PRESET_AMOUNTS = [10, 25, 50, 100, 250, 500];
 
+/**
+ * Add-credits page — tops up the wallet with a Stripe card payment.
+ *
+ * Two-step flow: pick an amount (preset or custom), then pay with a
+ * saved card or a newly entered one. After Stripe confirms the payment
+ * the backend is asked to credit the wallet. Also shows the current
+ * balance and a paginated credit transaction history.
+ */
 @Component({
   selector: 'app-add-credits',
   standalone: true,
@@ -86,6 +95,7 @@ export class AddCreditsComponent implements OnInit {
     this.loadSavedCards();
   }
 
+  /** Fetches the user's saved cards and defaults to paying with one when available. */
   private loadSavedCards(): void {
     this.stripeService.getSavedCards().subscribe({
       next: (cards) => {
@@ -95,6 +105,7 @@ export class AddCreditsComponent implements OnInit {
     });
   }
 
+  /** Loads Stripe.js in the background so the payment step opens instantly. */
   private prefetchStripe(): void {
     this.stripeService.getConfig().subscribe({
       next: async (config) => {
@@ -103,12 +114,21 @@ export class AddCreditsComponent implements OnInit {
     });
   }
 
+  /**
+   * Fills the amount field with a preset value.
+   *
+   * @param amount Preset top-up amount.
+   */
   selectPreset(amount: number): void {
     this.selectedPreset.set(amount);
     this.form.patchValue({ amount });
     this.intentError = '';
   }
 
+  /**
+   * Creates a payment intent for the chosen amount and advances to the
+   * payment step, mounting the card input unless a saved card is used.
+   */
   proceedToPayment(): void {
     if (this.form.invalid) {
       return;
@@ -140,17 +160,20 @@ export class AddCreditsComponent implements OnInit {
     });
   }
 
+  /** Switches the payment step to the saved card, unmounting the card input. */
   selectSavedCard(): void {
     this.useSavedCard.set(true);
     this.cardElement?.unmount();
     this.cardElement = null;
   }
 
+  /** Switches the payment step to entering a new card. */
   switchToNewCard(): void {
     this.useSavedCard.set(false);
     setTimeout(() => this.mountCardElement(), 0);
   }
 
+  /** Creates the Stripe card element and mounts it into the payment step's container. */
   private mountCardElement(): void {
     if (!this.stripe) {
       return;
@@ -186,6 +209,11 @@ export class AddCreditsComponent implements OnInit {
     this.stripeLoading.set(false);
   }
 
+  /**
+   * Confirms the card payment with Stripe and, on success, asks the
+   * backend to credit the wallet, then resets the flow back to the
+   * amount step and reloads the transaction history.
+   */
   async confirmPayment(): Promise<void> {
     if (!this.stripe || !this.paymentClientSecret) {
       return;
@@ -235,6 +263,7 @@ export class AddCreditsComponent implements OnInit {
     });
   }
 
+  /** Returns from the payment step to the amount step, discarding the card input. */
   backToAmount(): void {
     this.paymentStep.set(false);
     this.cardElement?.unmount();
@@ -244,11 +273,17 @@ export class AddCreditsComponent implements OnInit {
     this.useSavedCard.set(this.savedCards().length > 0);
   }
 
+  /**
+   * Handles paginator navigation in the transaction history.
+   *
+   * @param event Paginator event carrying the new page index.
+   */
   onPageChange(event: PageEvent): void {
     this.pageIndex.set(event.pageIndex);
     this.loadTransactions(event.pageIndex);
   }
 
+  /** Fetches the current wallet balance. */
   private loadBalance(): void {
     this.balanceLoading.set(true);
     this.walletService.getBalance().subscribe({
@@ -260,6 +295,11 @@ export class AddCreditsComponent implements OnInit {
     });
   }
 
+  /**
+   * Fetches a page of the credit transaction history.
+   *
+   * @param page Zero-based page index.
+   */
   private loadTransactions(page: number): void {
     this.transactionsLoading.set(true);
     this.walletService.getTransactions(page, this.pageSize).subscribe({

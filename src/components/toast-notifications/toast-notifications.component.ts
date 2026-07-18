@@ -5,6 +5,13 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { NotificationService } from '../../services/notification/notification.service';
 
+/**
+ * Overlay that renders the toast notifications emitted by
+ * {@link NotificationService}.
+ *
+ * Toasts link to the related ad and can be dismissed manually;
+ * otherwise they auto-dismiss after a few seconds.
+ */
 @Component({
   selector: 'app-toast-notifications',
   standalone: true,

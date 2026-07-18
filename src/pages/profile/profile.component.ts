@@ -28,8 +28,18 @@ import { StripeService } from '../../services/stripe/stripe.service';
 import { User } from '../../core/domain/user.model';
 import { PaymentMethodResponse } from '../../core/domain/stripe.model';
 
+/** The two tabs of the profile page. */
 type ProfileTab = 'info' | 'payment';
 
+/**
+ * Profile page with two tabs:
+ * - **info** — view and edit the user's personal details, and
+ * - **payment** — save a card via a Stripe setup intent and list the
+ *   already saved cards.
+ *
+ * Also handles the return leg of a Stripe 3DS redirect by reading the
+ * `redirect_status` query parameter.
+ */
 @Component({
   selector: 'app-profile',
   standalone: true,
@@ -127,6 +137,7 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  /** Fetches the user's saved cards for the payment tab. */
   private loadSavedCards(): void {
     this.cardsLoading.set(true);
 
@@ -139,6 +150,14 @@ export class ProfileComponent implements OnInit {
     });
   }
 
+  /**
+   * Switches between the info and payment tabs.
+   *
+   * Leaving the payment tab tears down the Stripe card element; entering
+   * it (re-)initializes Stripe. All feedback messages are cleared.
+   *
+   * @param tab Tab to activate.
+   */
   setTab(tab: ProfileTab): void {
     if (this.activeTab() === 'payment' && tab !== 'payment') {
       this.cardElement?.unmount();
@@ -160,6 +179,10 @@ export class ProfileComponent implements OnInit {
     }
   }
 
+  /**
+   * Initializes Stripe.js for the payment tab: fetches the publishable
+   * key and a setup intent, then mounts the card input element.
+   */
   private async initStripeElements(): Promise<void> {
     this.paymentLoading.set(true);
     this.paymentSuccess = false;
@@ -227,6 +250,12 @@ export class ProfileComponent implements OnInit {
     }
   }
 
+  /**
+   * Confirms the card setup with Stripe, saving the entered card.
+   *
+   * 3DS flows may redirect away and return to `/profile`. On success the
+   * saved cards are reloaded and a fresh card element is initialized.
+   */
   async confirmCard(): Promise<void> {
     if (!this.stripe || !this.cardElement || !this.setupClientSecret) {
       return;
@@ -267,6 +296,7 @@ export class ProfileComponent implements OnInit {
     this.confirmingCard.set(false);
   }
 
+  /** Saves the profile form via {@link UserService.edit}. */
   onSubmit(): void {
     if (this.form.invalid || !this.user) {
       return;
