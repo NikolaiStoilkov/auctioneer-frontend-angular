@@ -1,0 +1,24 @@
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+  padding: 24px 16px;
+}
+.auth-card {
+  width: 100%;
+  max-width: 500px;
+}
+.card-content {
+  padding-top: 16px;
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.form-error {
+  color: red;
+  font-size: 0.85rem;
+}
+.card-footer {
+  padding: 0 16px 8px;
+}

@@ -1,0 +1,26 @@
+.page-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 80vh;
+  padding: 16px;
+}
+.auth-card {
+  width: 100%;
+  max-width: 400px;
+}
+.card-content {
+  padding-top: 16px;
+}
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.form-error {
+  color: red;
+  font-size: 0.85rem;
+}
+.card-footer {
+  padding: 0 16px 8px;
+}

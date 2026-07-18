@@ -22,14 +22,14 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrl: './ad-create.component.css',
 })
 export class AdCreateComponent {
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
   private adService = inject(AdService);
-  private auth = inject(AuthService);
+  private authService = inject(AuthService);
   private router = inject(Router);
 
   error = '';
 
-  form = this.fb.group({
+  form = this.formBuilder.group({
     title: [
       '',
       [Validators.required, Validators.minLength(3), Validators.maxLength(100)],
@@ -59,18 +59,18 @@ export class AdCreateComponent {
       return;
     }
 
-    const v = this.form.value;
-    const userId = this.auth.getUserIdFromToken();
+    const formValue = this.form.value;
+    const userId = this.authService.getUserIdFromToken();
 
     this.adService
       .create({
-        title: v.title!,
-        description: v.description!,
-        location: v.location!,
-        startingBidPrice: v.startingBidPrice!,
-        currentBidPrice: v.startingBidPrice!,
-        bidStep: v.bidStep!,
-        image: v.image || undefined,
+        title: formValue.title!,
+        description: formValue.description!,
+        location: formValue.location!,
+        startingBidPrice: formValue.startingBidPrice!,
+        currentBidPrice: formValue.startingBidPrice!,
+        bidStep: formValue.bidStep!,
+        image: formValue.image || undefined,
         authorId: userId ?? undefined,
         status: 'ACTIVE',
         isActive: true,

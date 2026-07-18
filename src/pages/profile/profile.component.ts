@@ -50,9 +50,9 @@ type ProfileTab = 'info' | 'payment';
 export class ProfileComponent implements OnInit {
   @ViewChild('cardElementRef') cardElementRef!: ElementRef;
 
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
   private userService = inject(UserService);
-  private auth = inject(AuthService);
+  private authService = inject(AuthService);
   private stripeService = inject(StripeService);
   private route = inject(ActivatedRoute);
 
@@ -76,7 +76,7 @@ export class ProfileComponent implements OnInit {
   private cardElement: StripeCardElement | null = null;
   private setupClientSecret = '';
 
-  form = this.fb.group({
+  form = this.formBuilder.group({
     username: ['', Validators.required],
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
@@ -97,24 +97,24 @@ export class ProfileComponent implements OnInit {
 
     this.loadSavedCards();
 
-    const userId = this.auth.getUserIdFromToken();
+    const userId = this.authService.getUserIdFromToken();
     if (!userId) {
       this.loading.set(false);
       this.profileError = 'Could not identify user. Please sign in again.';
       return;
     }
     this.userService.getById(userId).subscribe({
-      next: (u) => {
-        this.user = u;
+      next: (loadedUser) => {
+        this.user = loadedUser;
 
         this.form.patchValue({
-          username: u.username,
-          firstName: u.firstName,
-          lastName: u.lastName,
-          email: u.email,
-          phoneNumber: u.phoneNumber,
-          city: u.city,
-          country: u.country,
+          username: loadedUser.username,
+          firstName: loadedUser.firstName,
+          lastName: loadedUser.lastName,
+          email: loadedUser.email,
+          phoneNumber: loadedUser.phoneNumber,
+          city: loadedUser.city,
+          country: loadedUser.country,
         });
 
         this.loading.set(false);
@@ -172,7 +172,7 @@ export class ProfileComponent implements OnInit {
         },
       );
 
-      const secret = await new Promise<{ clientSecret: string }>(
+      const setupIntentResponse = await new Promise<{ clientSecret: string }>(
         (resolve, reject) => {
           this.stripeService
             .createSetupIntent()
@@ -180,7 +180,7 @@ export class ProfileComponent implements OnInit {
         },
       );
 
-      this.setupClientSecret = secret.clientSecret;
+      this.setupClientSecret = setupIntentResponse.clientSecret;
       this.stripe = await loadStripe(config.publishableKey);
       if (!this.stripe) {
         throw new Error('Stripe failed to load');
@@ -202,17 +202,23 @@ export class ProfileComponent implements OnInit {
       this.paymentLoading.set(false);
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-      const el = document.getElementById('stripe-card-element');
+      const cardContainerElement = document.getElementById(
+        'stripe-card-element',
+      );
 
-      if (el) {
-        this.cardElement.mount(el);
+      if (cardContainerElement) {
+        this.cardElement.mount(cardContainerElement);
 
         this.cardElement.on('change', (event) => {
           this.cardError = event.error ? event.error.message : '';
         });
 
-        this.cardElement.on('focus', () => el.classList.add('focused'));
-        this.cardElement.on('blur', () => el.classList.remove('focused'));
+        this.cardElement.on('focus', () =>
+          cardContainerElement.classList.add('focused'),
+        );
+        this.cardElement.on('blur', () =>
+          cardContainerElement.classList.remove('focused'),
+        );
       }
     } catch {
       this.paymentError =
@@ -272,18 +278,18 @@ export class ProfileComponent implements OnInit {
 
     this.profileError = '';
 
-    const v = this.form.value;
+    const formValue = this.form.value;
 
     this.userService
       .edit({
         ...this.user,
-        username: v.username!,
-        firstName: v.firstName!,
-        lastName: v.lastName!,
-        email: v.email!,
-        phoneNumber: v.phoneNumber!,
-        city: v.city!,
-        country: v.country!,
+        username: formValue.username!,
+        firstName: formValue.firstName!,
+        lastName: formValue.lastName!,
+        email: formValue.email!,
+        phoneNumber: formValue.phoneNumber!,
+        city: formValue.city!,
+        country: formValue.country!,
       })
       .subscribe({
         next: () => {

@@ -1,6 +1,6 @@
 <div class="profile-layout">
   <mat-card class="profile-sidenav">
-    <mat-card-content style="padding: 8px 0">
+    <mat-card-content class="sidenav-content">
       <p class="section-title">Account</p>
       <mat-nav-list>
         <mat-list-item
@@ -29,28 +29,28 @@
         <mat-card-title>Profile Information</mat-card-title>
         <mat-card-subtitle>Update your personal details</mat-card-subtitle>
       </mat-card-header>
-      <mat-card-content style="padding-top: 16px">
+      <mat-card-content class="tab-content">
         @if (loading()) {
-          <div style="display: flex; justify-content: center; padding: 32px">
+          <div class="spinner-wrap">
             <mat-spinner></mat-spinner>
           </div>
         } @else {
           <form
             [formGroup]="form"
             (ngSubmit)="onSubmit()"
-            style="display: flex; flex-direction: column; gap: 10px"
+            class="profile-form"
           >
             <mat-form-field appearance="outline">
               <mat-label>Username</mat-label>
               <mat-icon matPrefix>account_circle</mat-icon>
               <input matInput formControlName="username" />
             </mat-form-field>
-            <div style="display: flex; gap: 12px">
-              <mat-form-field appearance="outline" style="flex: 1">
+            <div class="form-row">
+              <mat-form-field appearance="outline">
                 <mat-label>First Name</mat-label>
                 <input matInput formControlName="firstName" />
               </mat-form-field>
-              <mat-form-field appearance="outline" style="flex: 1">
+              <mat-form-field appearance="outline">
                 <mat-label>Last Name</mat-label>
                 <input matInput formControlName="lastName" />
               </mat-form-field>
@@ -65,23 +65,21 @@
               <mat-icon matPrefix>phone</mat-icon>
               <input matInput formControlName="phoneNumber" />
             </mat-form-field>
-            <div style="display: flex; gap: 12px">
-              <mat-form-field appearance="outline" style="flex: 1">
+            <div class="form-row">
+              <mat-form-field appearance="outline">
                 <mat-label>City</mat-label>
                 <input matInput formControlName="city" />
               </mat-form-field>
-              <mat-form-field appearance="outline" style="flex: 1">
+              <mat-form-field appearance="outline">
                 <mat-label>Country</mat-label>
                 <input matInput formControlName="country" />
               </mat-form-field>
             </div>
             @if (profileSuccess) {
-              <p style="color: #388e3c; font-size: 0.85rem; margin: 0">
-                ✓ Profile updated successfully.
-              </p>
+              <p class="success-msg">✓ Profile updated successfully.</p>
             }
             @if (profileError) {
-              <p style="color: #d32f2f; font-size: 0.85rem; margin: 0">
+              <p class="error-msg">
                 {{ profileError }}
               </p>
             }
@@ -94,7 +92,7 @@
               @if (saving()) {
                 <mat-spinner
                   diameter="20"
-                  style="display: inline-block"
+                  class="inline-spinner"
                 ></mat-spinner>
               } @else {
                 Save Changes
@@ -112,94 +110,54 @@
           >Securely save your card via Stripe</mat-card-subtitle
         >
       </mat-card-header>
-      <mat-card-content style="padding-top: 20px">
+      <mat-card-content class="tab-content-payment">
         <!-- ── Saved Cards ── -->
         @if (cardsLoading()) {
-          <div
-            style="display: flex; justify-content: center; padding: 12px 0 20px"
-          >
+          <div class="cards-spinner-wrap">
             <mat-spinner diameter="28"></mat-spinner>
           </div>
         } @else if (savedCards().length > 0) {
-          <div style="margin-bottom: 20px">
-            <p
-              style="
-                font-size: 0.75rem;
-                font-weight: 600;
-                text-transform: uppercase;
-                letter-spacing: 0.06em;
-                color: #666;
-                margin: 0 0 10px;
-              "
-            >
-              Saved Cards
-            </p>
+          <div class="saved-cards">
+            <p class="cards-label">Saved Cards</p>
             @for (pm of savedCards(); track pm.id) {
-              <div
-                style="
-                  display: flex;
-                  align-items: center;
-                  gap: 12px;
-                  padding: 10px 14px;
-                  border: 1px solid #e0e0e0;
-                  border-radius: 8px;
-                  margin-bottom: 8px;
-                  background: #fafafa;
-                "
-              >
-                <mat-icon style="color: #555; flex-shrink: 0"
-                  >credit_card</mat-icon
-                >
-                <span style="font-weight: 600; text-transform: capitalize">{{
-                  pm.card?.brand
-                }}</span>
-                <span style="letter-spacing: 0.06em"
-                  >•••• {{ pm.card?.last4 }}</span
-                >
-                <span style="color: #888; font-size: 0.8rem; margin-left: auto">
+              <div class="saved-card">
+                <mat-icon class="card-icon">credit_card</mat-icon>
+                <span class="card-brand">{{ pm.card?.brand }}</span>
+                <span class="card-number">•••• {{ pm.card?.last4 }}</span>
+                <span class="card-expiry">
                   Expires {{ pm.card?.expMonth }}/{{ pm.card?.expYear }}
                 </span>
               </div>
             }
-            <mat-divider style="margin: 16px 0"></mat-divider>
+            <mat-divider class="cards-divider"></mat-divider>
           </div>
         }
 
         @if (paymentLoading()) {
-          <div style="display: flex; justify-content: center; padding: 32px">
+          <div class="spinner-wrap">
             <mat-spinner></mat-spinner>
           </div>
         } @else {
-          <div style="display: flex; flex-direction: column; gap: 16px">
-            <p style="color: #555; font-size: 0.875rem; margin: 0">
+          <div class="payment-form">
+            <p class="hint-text">
               Enter your card details below. Your information is handled
               securely by Stripe. Use test card
               <strong>4242 4242 4242 4242</strong>, any future date and any CVC.
             </p>
             <div>
-              <label
-                style="
-                  font-size: 0.75rem;
-                  color: #666;
-                  display: block;
-                  margin-bottom: 6px;
-                "
-                >Card details</label
-              >
+              <label class="field-label">Card details</label>
               <div id="stripe-card-element" #cardElementRef></div>
               @if (cardError) {
-                <p style="color: #d32f2f; font-size: 0.75rem; margin: 6px 0 0">
+                <p class="field-error">
                   {{ cardError }}
                 </p>
               }
             </div>
             @if (paymentSuccess) {
-              <p style="color: #388e3c; font-size: 0.875rem; margin: 0">
-                ✓ Payment method saved successfully!
-              </p>
+              <p class="success-msg-lg">✓ Payment method saved successfully!</p>
             }
             @if (paymentError) {
-              <p style="color: #d32f2f; font-size: 0.875rem; margin: 0">
+              <p class="error-msg-lg">
                 {{ paymentError }}
               </p>
             }
@@ -208,12 +166,12 @@
               color="primary"
               (click)="confirmCard()"
               [disabled]="confirmingCard()"
-              style="height: 48px"
+              class="save-card-btn"
             >
               @if (confirmingCard()) {
                 <mat-spinner
                   diameter="22"
-                  style="display: inline-block"
+                  class="inline-spinner"
                 ></mat-spinner>
               } @else {
                 <ng-container>

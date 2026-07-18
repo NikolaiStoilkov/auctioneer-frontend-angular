@@ -44,7 +44,7 @@ const PRESET_AMOUNTS = [10, 25, 50, 100, 250, 500];
   styleUrl: './add-credits.component.css',
 })
 export class AddCreditsComponent implements OnInit {
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
   private walletService = inject(WalletService);
   private stripeService = inject(StripeService);
 
@@ -57,7 +57,7 @@ export class AddCreditsComponent implements OnInit {
   creatingIntent = signal(false);
   stripeLoading = signal(false);
   submitting = signal(false);
-  txLoading = signal(true);
+  transactionsLoading = signal(true);
   transactions = signal<CreditTransaction[]>([]);
   totalElements = signal(0);
   pageIndex = signal(0);
@@ -66,8 +66,8 @@ export class AddCreditsComponent implements OnInit {
   savedCards = signal<PaymentMethodResponse[]>([]);
   useSavedCard = signal(false);
 
-  successMsg = '';
-  errorMsg = '';
+  successMessage = '';
+  errorMessage = '';
   intentError = '';
   cardError = '';
 
@@ -75,7 +75,7 @@ export class AddCreditsComponent implements OnInit {
   private cardElement: StripeCardElement | null = null;
   private paymentClientSecret = '';
 
-  form = this.fb.group({
+  form = this.formBuilder.group({
     amount: [null as number | null, [Validators.required, Validators.min(1)]],
   });
 
@@ -97,8 +97,8 @@ export class AddCreditsComponent implements OnInit {
 
   private prefetchStripe(): void {
     this.stripeService.getConfig().subscribe({
-      next: async (cfg) => {
-        this.stripe = await loadStripe(cfg.publishableKey);
+      next: async (config) => {
+        this.stripe = await loadStripe(config.publishableKey);
       },
     });
   }
@@ -121,8 +121,8 @@ export class AddCreditsComponent implements OnInit {
     const amount = this.form.value.amount!;
 
     this.walletService.createPaymentIntent(amount).subscribe({
-      next: (res) => {
-        this.paymentClientSecret = res.clientSecret;
+      next: (paymentIntentResponse) => {
+        this.paymentClientSecret = paymentIntentResponse.clientSecret;
 
         this.creatingIntent.set(false);
 
@@ -168,14 +168,20 @@ export class AddCreditsComponent implements OnInit {
         invalid: { color: '#d32f2f' },
       },
     });
-    const el = document.getElementById('stripe-payment-element');
-    if (el) {
-      this.cardElement.mount(el);
+    const cardContainerElement = document.getElementById(
+      'stripe-payment-element',
+    );
+    if (cardContainerElement) {
+      this.cardElement.mount(cardContainerElement);
       this.cardElement.on('change', (event) => {
         this.cardError = event.error ? event.error.message : '';
       });
-      this.cardElement.on('focus', () => el.classList.add('focused'));
-      this.cardElement.on('blur', () => el.classList.remove('focused'));
+      this.cardElement.on('focus', () =>
+        cardContainerElement.classList.add('focused'),
+      );
+      this.cardElement.on('blur', () =>
+        cardContainerElement.classList.remove('focused'),
+      );
     }
     this.stripeLoading.set(false);
   }
@@ -184,35 +190,36 @@ export class AddCreditsComponent implements OnInit {
     if (!this.stripe || !this.paymentClientSecret) {
       return;
     }
-    const usingSaved = this.useSavedCard() && this.savedCards().length > 0;
-    if (!usingSaved && !this.cardElement) {
+    const isUsingSavedCard =
+      this.useSavedCard() && this.savedCards().length > 0;
+    if (!isUsingSavedCard && !this.cardElement) {
       return;
     }
 
     this.submitting.set(true);
-    this.successMsg = '';
-    this.errorMsg = '';
+    this.successMessage = '';
+    this.errorMessage = '';
 
     const result = await this.stripe.confirmCardPayment(
       this.paymentClientSecret,
       {
-        payment_method: usingSaved
+        payment_method: isUsingSavedCard
           ? this.savedCards()[0].id
           : { card: this.cardElement! },
       },
     );
 
     if (result.error) {
-      this.errorMsg = result.error.message ?? 'Payment failed.';
+      this.errorMessage = result.error.message ?? 'Payment failed.';
       this.submitting.set(false);
       return;
     }
 
     const amount = this.form.value.amount!;
     this.walletService.confirmCredits(amount).subscribe({
-      next: (updated) => {
-        this.balance.set(updated);
-        this.successMsg = `€${amount.toFixed(2)} added to your account!`;
+      next: (updatedBalance) => {
+        this.balance.set(updatedBalance);
+        this.successMessage = `€${amount.toFixed(2)} added to your account!`;
         this.submitting.set(false);
         this.paymentStep.set(false);
         this.form.reset();
@@ -221,7 +228,7 @@ export class AddCreditsComponent implements OnInit {
         this.loadTransactions(0);
       },
       error: () => {
-        this.errorMsg =
+        this.errorMessage =
           'Payment succeeded but credits update failed. Contact support.';
         this.submitting.set(false);
       },
@@ -232,7 +239,7 @@ export class AddCreditsComponent implements OnInit {
     this.paymentStep.set(false);
     this.cardElement?.unmount();
     this.cardElement = null;
-    this.errorMsg = '';
+    this.errorMessage = '';
     this.cardError = '';
     this.useSavedCard.set(this.savedCards().length > 0);
   }
@@ -245,8 +252,8 @@ export class AddCreditsComponent implements OnInit {
   private loadBalance(): void {
     this.balanceLoading.set(true);
     this.walletService.getBalance().subscribe({
-      next: (b) => {
-        this.balance.set(b);
+      next: (walletBalance) => {
+        this.balance.set(walletBalance);
         this.balanceLoading.set(false);
       },
       error: () => this.balanceLoading.set(false),
@@ -254,14 +261,14 @@ export class AddCreditsComponent implements OnInit {
   }
 
   private loadTransactions(page: number): void {
-    this.txLoading.set(true);
+    this.transactionsLoading.set(true);
     this.walletService.getTransactions(page, this.pageSize).subscribe({
-      next: (res) => {
-        this.transactions.set(res.content);
-        this.totalElements.set(res.totalElements);
-        this.txLoading.set(false);
+      next: (transactionsPage) => {
+        this.transactions.set(transactionsPage.content);
+        this.totalElements.set(transactionsPage.totalElements);
+        this.transactionsLoading.set(false);
       },
-      error: () => this.txLoading.set(false),
+      error: () => this.transactionsLoading.set(false),
     });
   }
 }

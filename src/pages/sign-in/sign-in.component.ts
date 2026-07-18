@@ -22,13 +22,13 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrl: './sign-in.component.css',
 })
 export class SignInComponent {
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
   error = '';
 
-  form = this.fb.group({
+  form = this.formBuilder.group({
     username: ['', Validators.required],
     password: ['', Validators.required],
   });

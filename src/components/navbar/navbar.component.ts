@@ -22,7 +22,7 @@ import { BalanceService } from '../../services/wallet/balance.service';
   styleUrl: './navbar.component.css',
 })
 export class NavbarComponent {
-  auth = inject(AuthService);
-  ns = inject(NotificationService);
-  bs = inject(BalanceService);
+  authService = inject(AuthService);
+  notificationService = inject(NotificationService);
+  balanceService = inject(BalanceService);
 }

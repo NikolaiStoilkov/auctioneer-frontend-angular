@@ -1,70 +1,35 @@
-<div style="max-width: 1100px; margin: 0 auto; padding: 24px 16px">
-  <h1 style="margin-bottom: 24px">Active Auctions</h1>
+<div class="page">
+  <h1>Active Auctions</h1>
   @if (loading()) {
-    <div style="display: flex; justify-content: center; padding: 48px">
+    <div class="spinner-wrap">
       <mat-spinner></mat-spinner>
     </div>
   } @else {
-    <div
-      style="
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-        gap: 20px;
-      "
-    >
+    <div class="ads-grid">
       @for (ad of ads(); track ad.id) {
-        <mat-card style="cursor: pointer" [routerLink]="['/ads', ad.id]">
+        <mat-card class="ad-card" [routerLink]="['/ads', ad.id]">
           @if (ad.image) {
             <img
               mat-card-image
               [src]="ad.image"
               [alt]="ad.title"
-              style="height: 180px; object-fit: cover"
+              class="ad-image"
             />
           } @else {
-            <div
-              style="
-                height: 180px;
-                background: #e0e0e0;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                color: #9e9e9e;
-                font-size: 0.9rem;
-              "
-            >
-              No Image
-            </div>
+            <div class="no-image">No Image</div>
           }
-          <mat-card-header style="padding: 12px 12px 0">
-            <mat-card-title style="font-size: 1rem">{{
+          <mat-card-header class="ad-card-header">
+            <mat-card-title class="ad-card-title">{{
               ad.title
             }}</mat-card-title>
             <mat-card-subtitle>{{ ad.location }}</mat-card-subtitle>
           </mat-card-header>
-          <mat-card-content style="padding: 8px 12px">
-            <p
-              style="
-                margin: 0;
-                font-size: 0.85rem;
-                color: #555;
-                overflow: hidden;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                -webkit-box-orient: vertical;
-              "
-            >
+          <mat-card-content class="ad-card-content">
+            <p class="ad-description">
               {{ ad.description }}
             </p>
-            <div
-              style="
-                margin-top: 8px;
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-              "
-            >
-              <span style="font-weight: 500; color: #1976d2">
+            <div class="ad-footer">
+              <span class="current-price">
                 Current: ${{ livePrice(ad) }}
               </span>
               <mat-chip-set>
@@ -77,22 +42,15 @@
         </mat-card>
       }
       @if (ads().length === 0) {
-        <p style="color: #666">No auctions found.</p>
+        <p class="no-results">No auctions found.</p>
       }
     </div>
     @if (ads().length > 0) {
-      <div
-        style="
-          display: flex;
-          justify-content: center;
-          gap: 12px;
-          margin-top: 32px;
-        "
-      >
+      <div class="pagination">
         <button mat-button [disabled]="page() === 1" (click)="prevPage()">
           Previous
         </button>
-        <span style="line-height: 36px">Page {{ page() }}</span>
+        <span class="page-label">Page {{ page() }}</span>
         <button
           mat-button
           [disabled]="ads().length < pageSize"

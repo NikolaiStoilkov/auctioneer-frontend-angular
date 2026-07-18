@@ -135,3 +135,119 @@
   color: #444;
   line-height: 1.5;
 }
+.page {
+  max-width: 840px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+.spinner-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+.ad-image {
+  max-height: 380px;
+  object-fit: cover;
+}
+.card-header {
+  padding: 16px 16px 0;
+}
+.card-title {
+  font-size: 22px;
+}
+.card-content {
+  padding: 16px;
+}
+.description {
+  color: #444;
+  line-height: 1.6;
+}
+.section-divider {
+  margin: 16px 0;
+}
+.icon-xs {
+  font-size: 14px;
+  vertical-align: middle;
+}
+.icon-sm {
+  font-size: 16px;
+  vertical-align: middle;
+}
+.icon-inline {
+  vertical-align: middle;
+}
+.status-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.status-chip {
+  font-weight: 600;
+}
+.highest-bidder {
+  font-size: 13px;
+  color: #555;
+  margin-bottom: 12px;
+}
+.muted-note {
+  color: #777;
+  margin: 0;
+}
+.bid-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.bid-button {
+  padding: 0 28px;
+  height: 44px;
+  font-size: 15px;
+}
+.inline-spinner {
+  display: inline-block;
+}
+.bid-status {
+  color: #2e7d32;
+  font-weight: 500;
+}
+.bid-status.error {
+  color: #c62828;
+}
+.history-title {
+  margin: 0 0 12px;
+}
+.bid-time {
+  font-size: 12px;
+  color: #999;
+}
+.comments-card {
+  margin-top: 24px;
+}
+.no-comments {
+  color: #aaa;
+  text-align: center;
+  padding: 16px 0;
+}
+.comment-form {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.comment-field {
+  flex: 1;
+}
+.post-btn {
+  margin-top: 4px;
+}
+.signin-note {
+  color: #777;
+  margin: 16px 0 0;
+}
+.not-found {
+  text-align: center;
+  color: #777;
+  padding: 48px;
+}

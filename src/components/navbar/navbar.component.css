@@ -1,0 +1,11 @@
+.brand {
+  cursor: pointer;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+.spacer {
+  flex: 1;
+}
+.notifications-btn {
+  margin: 0 4px;
+}

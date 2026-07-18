@@ -4,14 +4,14 @@ import { WalletService } from './wallet.service';
 
 @Injectable({ providedIn: 'root' })
 export class BalanceService {
-  private auth = inject(AuthService);
-  private wallet = inject(WalletService);
+  private authService = inject(AuthService);
+  private walletService = inject(WalletService);
 
   balance = signal<number | null>(null);
 
   constructor() {
     effect(() => {
-      if (this.auth.isLoggedIn()) {
+      if (this.authService.isLoggedIn()) {
         this.refresh();
       } else {
         this.balance.set(null);
@@ -20,12 +20,12 @@ export class BalanceService {
   }
 
   refresh() {
-    if (!this.auth.isLoggedIn()) {
+    if (!this.authService.isLoggedIn()) {
       return;
     }
 
-    this.wallet.getBalance().subscribe({
-      next: (b) => this.balance.set(Number(b.balance)),
+    this.walletService.getBalance().subscribe({
+      next: (walletBalance) => this.balance.set(Number(walletBalance.balance)),
     });
   }
 }

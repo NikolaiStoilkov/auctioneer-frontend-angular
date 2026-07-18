@@ -1,14 +1,10 @@
-<div style="display: flex; justify-content: center; padding: 24px 16px">
-  <mat-card style="width: 100%; max-width: 500px">
+<div class="page-wrapper">
+  <mat-card class="auth-card">
     <mat-card-header>
       <mat-card-title>Sign Up</mat-card-title>
     </mat-card-header>
-    <mat-card-content style="padding-top: 16px">
-      <form
-        [formGroup]="form"
-        (ngSubmit)="onSubmit()"
-        style="display: flex; flex-direction: column; gap: 10px"
-      >
+    <mat-card-content class="card-content">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
         <mat-form-field appearance="outline">
           <mat-label>Username</mat-label>
           <input matInput formControlName="username" />
@@ -58,7 +54,7 @@
           <input matInput formControlName="postalCode" />
         </mat-form-field>
         @if (error) {
-          <p style="color: red; font-size: 0.85rem">{{ error }}</p>
+          <p class="form-error">{{ error }}</p>
         }
         <button
           mat-raised-button
@@ -71,7 +67,7 @@
       </form>
     </mat-card-content>
     <mat-card-actions>
-      <p style="padding: 0 16px 8px">
+      <p class="card-footer">
         Already have an account? <a routerLink="/sign-in">Sign In</a>
       </p>
     </mat-card-actions>

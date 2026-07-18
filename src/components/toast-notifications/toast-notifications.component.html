@@ -1,5 +1,5 @@
 <div class="toast-container">
-  @for (toast of ns.toasts(); track toast.id) {
+  @for (toast of notificationService.toasts(); track toast.id) {
     <div class="toast">
       <mat-icon class="toast-icon">gavel</mat-icon>
       <div class="toast-body">
@@ -21,7 +21,7 @@
       <button
         mat-icon-button
         class="toast-close"
-        (click)="ns.dismissToast(toast.id)"
+        (click)="notificationService.dismissToast(toast.id)"
       >
         <mat-icon>close</mat-icon>
       </button>

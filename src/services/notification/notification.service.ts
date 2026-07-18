@@ -23,11 +23,11 @@ export class NotificationService implements OnDestroy {
 
   private balanceService = inject(BalanceService);
 
-  constructor(private auth: AuthService) {
+  constructor(private authService: AuthService) {
     this.connectGlobalBids();
 
     effect(() => {
-      if (auth.isLoggedIn()) {
+      if (authService.isLoggedIn()) {
         this.connectUserStream();
       } else {
         this.disconnectUserStream();
@@ -58,7 +58,7 @@ export class NotificationService implements OnDestroy {
       return;
     }
 
-    const token = this.auth.getToken();
+    const token = this.authService.getToken();
 
     if (!token) {
       return;
@@ -85,9 +85,9 @@ export class NotificationService implements OnDestroy {
           id: ++this.nextId
         };
 
-        this.toasts.update((t) => [toast, ...t]);
+        this.toasts.update((currentToasts) => [toast, ...currentToasts]);
 
-        this.unreadCount.update((c) => c + 1);
+        this.unreadCount.update((currentCount) => currentCount + 1);
 
         setTimeout(() => this.dismissToast(toast.id), 6000);
       },
@@ -102,7 +102,9 @@ export class NotificationService implements OnDestroy {
   }
 
   dismissToast(id: number): void {
-    this.toasts.update((t) => t.filter((n) => n.id !== id));
+    this.toasts.update((currentToasts) =>
+      currentToasts.filter((toast) => toast.id !== id),
+    );
   }
 
   clearUnread(): void {

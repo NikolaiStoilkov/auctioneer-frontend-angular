@@ -23,7 +23,7 @@ import { NotificationService } from '../../services/notification/notification.se
 })
 export class HomeComponent implements OnInit {
   private adService = inject(AdService);
-  ns = inject(NotificationService);
+  notificationService = inject(NotificationService);
 
   ads = signal<Ad[]>([]);
   loading = signal(true);
@@ -44,8 +44,8 @@ export class HomeComponent implements OnInit {
     };
 
     this.adService.getPaginated(filter).subscribe({
-      next: (data) => {
-        this.ads.set(data);
+      next: (loadedAds) => {
+        this.ads.set(loadedAds);
 
         this.loading.set(false);
       },
@@ -55,20 +55,20 @@ export class HomeComponent implements OnInit {
 
   prevPage(): void {
     if (this.page() > 1) {
-      this.page.update((p) => p - 1);
+      this.page.update((currentPage) => currentPage - 1);
 
       this.load();
     }
   }
 
   nextPage(): void {
-    this.page.update((p) => p + 1);
+    this.page.update((currentPage) => currentPage + 1);
     this.load();
   }
 
   livePrice(ad: Ad): string {
     const price =
-      this.ns.liveAdPrices()[ad.id!] ??
+      this.notificationService.liveAdPrices()[ad.id!] ??
       ad.currentBidPrice ??
       ad.startingBidPrice;
 

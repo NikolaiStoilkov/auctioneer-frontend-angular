@@ -1,0 +1,55 @@
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+.page-header h1 {
+  margin: 0;
+}
+.spinner-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 48px;
+}
+.ads-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.ad-image {
+  height: 160px;
+  object-fit: cover;
+}
+.ad-card-header {
+  padding: 12px 12px 0;
+}
+.ad-card-title {
+  font-size: 1rem;
+}
+.ad-card-content {
+  padding: 8px 12px;
+}
+.ad-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.ad-price {
+  font-weight: 500;
+  color: #1976d2;
+}
+.ad-price.live {
+  color: #2e7d32;
+}
+.ad-card-actions {
+  padding: 0 8px 8px;
+}
+.no-results {
+  color: #666;
+}

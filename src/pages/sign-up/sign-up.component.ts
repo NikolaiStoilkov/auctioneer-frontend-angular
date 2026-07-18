@@ -22,13 +22,13 @@ import { AuthService } from '../../services/auth/auth.service';
   styleUrl: './sign-up.component.css',
 })
 export class SignUpComponent {
-  private fb = inject(FormBuilder);
+  private formBuilder = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
 
   error = '';
 
-  form = this.fb.group({
+  form = this.formBuilder.group({
     username: ['', [Validators.required, Validators.minLength(3)]],
     password: ['', [Validators.required, Validators.minLength(6)]],
     firstName: ['', Validators.required],
@@ -51,22 +51,22 @@ export class SignUpComponent {
       return;
     }
 
-    const v = this.form.value;
+    const formValue = this.form.value;
 
     this.authService
       .signUp({
-        username: v.username!,
-        password: v.password!,
-        firstName: v.firstName!,
-        lastName: v.lastName!,
-        email: v.email!,
-        phoneNumber: v.phoneNumber!,
-        ucn: v.ucn!,
-        country: v.country!,
-        city: v.city!,
-        street: v.street!,
-        streetNumber: v.streetNumber!,
-        postalCode: v.postalCode!,
+        username: formValue.username!,
+        password: formValue.password!,
+        firstName: formValue.firstName!,
+        lastName: formValue.lastName!,
+        email: formValue.email!,
+        phoneNumber: formValue.phoneNumber!,
+        ucn: formValue.ucn!,
+        country: formValue.country!,
+        city: formValue.city!,
+        street: formValue.street!,
+        streetNumber: formValue.streetNumber!,
+        postalCode: formValue.postalCode!,
         roles: ['USER'],
       })
       .subscribe({

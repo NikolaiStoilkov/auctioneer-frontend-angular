@@ -58,14 +58,14 @@ export class AdDetailComponent implements OnInit, OnDestroy {
   private commentService = inject(CommentService);
   private ngZone = inject(NgZone);
   private balanceService = inject(BalanceService);
-  auth = inject(AuthService);
-  private fb = inject(FormBuilder);
+  authService = inject(AuthService);
+  private formBuilder = inject(FormBuilder);
 
   ad = signal<Ad | null>(null);
   comments = signal<Comment[]>([]);
   loading = signal(true);
   bidding = signal(false);
-  bidMsg = signal('');
+  bidMessage = signal('');
   bidError = signal(false);
   sseConnected = signal(false);
   latestBidderUsername = signal('');
@@ -77,27 +77,30 @@ export class AdDetailComponent implements OnInit, OnDestroy {
   );
 
   nextBid = computed(() => {
-    const a = this.ad();
-    if (!a) {
+    const currentAd = this.ad();
+    if (!currentAd) {
       return 0;
     }
-    return (a.currentBidPrice ?? a.startingBidPrice) + a.bidStep;
+    return (
+      (currentAd.currentBidPrice ?? currentAd.startingBidPrice) +
+      currentAd.bidStep
+    );
   });
 
   // The logged-in user is already the highest bidder — they cannot bid again
   // until someone outbids them.
   isHighestBidder = computed(() => {
-    const userId = this.auth.getUserIdFromToken();
+    const userId = this.authService.getUserIdFromToken();
     return userId != null && this.latestBidderUserId() === userId;
   });
 
   // Owners cannot bid on their own ads.
   isOwner = computed(() => {
-    const userId = this.auth.getUserIdFromToken();
+    const userId = this.authService.getUserIdFromToken();
     return userId != null && this.ad()?.authorId === userId;
   });
 
-  commentForm = this.fb.group({
+  commentForm = this.formBuilder.group({
     content: ['', [Validators.required, Validators.maxLength(100)]]
   });
 
@@ -130,34 +133,35 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     if (!ad.lastBidders?.length) {
       return;
     }
-    const sorted = [...ad.lastBidders]
-      .filter((lb) => lb.amount != null && lb.timestamp != null)
+    const sortedBidders = [...ad.lastBidders]
+      .filter((bidder) => bidder.amount != null && bidder.timestamp != null)
       .sort(
-        (a, b) =>
-          new Date(b.timestamp!).getTime() - new Date(a.timestamp!).getTime()
+        (firstBidder, secondBidder) =>
+          new Date(secondBidder.timestamp!).getTime() -
+          new Date(firstBidder.timestamp!).getTime()
       )
       .slice(0, 10);
 
-    const history: BidResponse[] = sorted.map((lb) => ({
+    const bidHistoryEntries: BidResponse[] = sortedBidders.map((bidder) => ({
       adId: ad.id!,
-      currentBidPrice: lb.amount!,
-      nextMinimumBid: lb.amount! + (ad.bidStep ?? 0),
-      latestBidderUsername: lb.username ?? '',
-      latestBidderUserId: lb.userId,
-      timestamp: lb.timestamp!
+      currentBidPrice: bidder.amount!,
+      nextMinimumBid: bidder.amount! + (ad.bidStep ?? 0),
+      latestBidderUsername: bidder.username ?? '',
+      latestBidderUserId: bidder.userId,
+      timestamp: bidder.timestamp!
     }));
 
-    this.bidHistory.set(history);
+    this.bidHistory.set(bidHistoryEntries);
 
-    if (sorted.length > 0) {
-      this.latestBidderUsername.set(sorted[0].username ?? '');
-      this.latestBidderUserId.set(sorted[0].userId ?? null);
+    if (sortedBidders.length > 0) {
+      this.latestBidderUsername.set(sortedBidders[0].username ?? '');
+      this.latestBidderUserId.set(sortedBidders[0].userId ?? null);
     }
   }
 
   private loadComments (): void {
     this.commentService.getByAdId(this.adId).subscribe({
-      next: (c) => this.comments.set(c)
+      next: (loadedComments) => this.comments.set(loadedComments)
     });
   }
 
@@ -170,8 +174,8 @@ export class AdDetailComponent implements OnInit, OnDestroy {
 
       this.sseSource.addEventListener('bid', (event: MessageEvent) => {
         try {
-          const data: BidResponse = JSON.parse(event.data);
-          this.ngZone.run(() => this.applyBidUpdate(data));
+          const bidUpdate: BidResponse = JSON.parse(event.data);
+          this.ngZone.run(() => this.applyBidUpdate(bidUpdate));
         } catch {
           /* ignore parse errors */
         }
@@ -191,24 +195,26 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     this.sseSource = null;
   }
 
-  private applyBidUpdate (data: BidResponse): void {
-    this.ad.update((a) =>
-      a ? { ...a, currentBidPrice: data.currentBidPrice } : a
+  private applyBidUpdate (bidUpdate: BidResponse): void {
+    this.ad.update((currentAd) =>
+      currentAd
+        ? { ...currentAd, currentBidPrice: bidUpdate.currentBidPrice }
+        : currentAd
     );
-    this.latestBidderUsername.set(data.latestBidderUsername ?? '');
-    this.latestBidderUserId.set(data.latestBidderUserId ?? null);
+    this.latestBidderUsername.set(bidUpdate.latestBidderUsername ?? '');
+    this.latestBidderUserId.set(bidUpdate.latestBidderUserId ?? null);
 
-    this.bidHistory.update((h) => {
+    this.bidHistory.update((history) => {
       if (
-        h.some(
-          (e) =>
-            e.timestamp === data.timestamp &&
-            e.currentBidPrice === data.currentBidPrice
+        history.some(
+          (historyEntry) =>
+            historyEntry.timestamp === bidUpdate.timestamp &&
+            historyEntry.currentBidPrice === bidUpdate.currentBidPrice
         )
       ) {
-        return h;
+        return history;
       }
-      return [data, ...h].slice(0, 10);
+      return [bidUpdate, ...history].slice(0, 10);
     });
   }
 
@@ -218,7 +224,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     if (!this.ad() || this.bidding()) {
       return;
     }
-    if (!this.auth.isLoggedIn()) {
+    if (!this.authService.isLoggedIn()) {
       return;
     }
     // Owners cannot bid on their own ads.
@@ -231,31 +237,35 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     }
 
     this.bidding.set(true);
-    this.bidMsg.set('');
+    this.bidMessage.set('');
 
     this.adService.bid(this.adId).subscribe({
-      next: (response) => {
+      next: (bidResponse) => {
         this.bidding.set(false);
 
-        this.bidMsg.set(
-          `Bid placed! Next minimum: $${response.nextMinimumBid}`
+        this.bidMessage.set(
+          `Bid placed! Next minimum: $${bidResponse.nextMinimumBid}`
         );
 
         this.bidError.set(false);
 
-        this.applyBidUpdate(response);
+        this.applyBidUpdate(bidResponse);
 
         this.balanceService.refresh();
       },
-      error: (err) => {
+      error: (errorResponse) => {
         this.bidding.set(false);
 
-        const msg =
-          err?.error?.error ??
-          err?.error?.message ??
+        const errorMessage =
+          errorResponse?.error?.error ??
+          errorResponse?.error?.message ??
           'Failed to place bid. Please try again.';
 
-        this.bidMsg.set(typeof msg === 'string' ? msg : 'Failed to place bid.');
+        this.bidMessage.set(
+          typeof errorMessage === 'string'
+            ? errorMessage
+            : 'Failed to place bid.'
+        );
 
         this.bidError.set(true);
       }
@@ -267,7 +277,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
       return;
     }
 
-    const userId = this.auth.getUserIdFromToken();
+    const userId = this.authService.getUserIdFromToken();
 
     if (!userId) {
       return;

@@ -13,5 +13,5 @@ import { NotificationService } from '../../services/notification/notification.se
   styleUrl: './toast-notifications.component.css',
 })
 export class ToastNotificationsComponent {
-  ns = inject(NotificationService);
+  notificationService = inject(NotificationService);
 }

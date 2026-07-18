@@ -1,14 +1,10 @@
-<div style="display: flex; justify-content: center; padding: 24px 16px">
-  <mat-card style="width: 100%; max-width: 600px">
+<div class="page-wrapper">
+  <mat-card class="form-card">
     <mat-card-header>
       <mat-card-title>Create Auction</mat-card-title>
     </mat-card-header>
-    <mat-card-content style="padding-top: 16px">
-      <form
-        [formGroup]="form"
-        (ngSubmit)="onSubmit()"
-        style="display: flex; flex-direction: column; gap: 12px"
-      >
+    <mat-card-content class="card-content">
+      <form [formGroup]="form" (ngSubmit)="onSubmit()" class="ad-form">
         <mat-form-field appearance="outline">
           <mat-label>Title</mat-label>
           <input matInput formControlName="title" />
@@ -34,7 +30,7 @@
           <input matInput formControlName="image" />
         </mat-form-field>
         @if (error) {
-          <p style="color: red; font-size: 0.85rem">{{ error }}</p>
+          <p class="form-error">{{ error }}</p>
         }
         <button
           mat-raised-button

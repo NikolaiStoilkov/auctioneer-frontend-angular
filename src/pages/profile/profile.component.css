@@ -49,3 +49,121 @@
   border-color: #3f51b5;
   border-width: 2px;
 }
+.sidenav-content {
+  padding: 8px 0;
+}
+.tab-content {
+  padding-top: 16px;
+}
+.tab-content-payment {
+  padding-top: 20px;
+}
+.spinner-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 32px;
+}
+.cards-spinner-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0 20px;
+}
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.form-row {
+  display: flex;
+  gap: 12px;
+}
+.form-row mat-form-field {
+  flex: 1;
+}
+.success-msg {
+  color: #388e3c;
+  font-size: 0.85rem;
+  margin: 0;
+}
+.error-msg {
+  color: #d32f2f;
+  font-size: 0.85rem;
+  margin: 0;
+}
+.inline-spinner {
+  display: inline-block;
+}
+.saved-cards {
+  margin-bottom: 20px;
+}
+.cards-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #666;
+  margin: 0 0 10px;
+}
+.saved-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: #fafafa;
+}
+.card-icon {
+  color: #555;
+  flex-shrink: 0;
+}
+.card-brand {
+  font-weight: 600;
+  text-transform: capitalize;
+}
+.card-number {
+  letter-spacing: 0.06em;
+}
+.card-expiry {
+  color: #888;
+  font-size: 0.8rem;
+  margin-left: auto;
+}
+.cards-divider {
+  margin: 16px 0;
+}
+.payment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.hint-text {
+  color: #555;
+  font-size: 0.875rem;
+  margin: 0;
+}
+.field-label {
+  font-size: 0.75rem;
+  color: #666;
+  display: block;
+  margin-bottom: 6px;
+}
+.field-error {
+  color: #d32f2f;
+  font-size: 0.75rem;
+  margin: 6px 0 0;
+}
+.success-msg-lg {
+  color: #388e3c;
+  font-size: 0.875rem;
+  margin: 0;
+}
+.error-msg-lg {
+  color: #d32f2f;
+  font-size: 0.875rem;
+  margin: 0;
+}
+.save-card-btn {
+  height: 48px;
+}

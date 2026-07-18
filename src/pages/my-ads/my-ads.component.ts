@@ -23,15 +23,15 @@ import { NotificationService } from '../../services/notification/notification.se
 })
 export class MyAdsComponent implements OnInit {
   private adService = inject(AdService);
-  ns = inject(NotificationService);
+  notificationService = inject(NotificationService);
 
   ads = signal<Ad[]>([]);
   loading = signal(true);
 
   ngOnInit(): void {
     this.adService.getMyAds().subscribe({
-      next: (data) => {
-        this.ads.set(data);
+      next: (loadedAds) => {
+        this.ads.set(loadedAds);
 
         this.loading.set(false);
       },
@@ -41,7 +41,7 @@ export class MyAdsComponent implements OnInit {
 
   livePrice(ad: Ad): string {
     const price =
-      this.ns.liveAdPrices()[ad.id!] ??
+      this.notificationService.liveAdPrices()[ad.id!] ??
       ad.currentBidPrice ??
       ad.startingBidPrice;
 

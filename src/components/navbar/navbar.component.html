@@ -1,21 +1,21 @@
 <mat-toolbar color="primary">
-  <span
-    routerLink="/"
-    style="cursor: pointer; font-weight: bold; font-size: 1.2rem"
-    >Auctioneer</span
-  >
-  <span style="flex: 1"></span>
-  @if (auth.isLoggedIn()) {
+  <span routerLink="/" class="brand">Auctioneer</span>
+  <span class="spacer"></span>
+  @if (authService.isLoggedIn()) {
     <button mat-button routerLink="/my-ads">My Ads</button>
     <button mat-button routerLink="/ads/create">Create Ad</button>
     <button mat-button routerLink="/add-credits">
       <mat-icon>account_balance_wallet</mat-icon>
-      ${{ bs.balance() !== null ? bs.balance()!.toFixed(2) : '—' }}
+      ${{ balanceService.balance() !== null ? balanceService.balance()!.toFixed(2) : '—' }}
     </button>
-    <button mat-icon-button (click)="ns.clearUnread()" style="margin: 0 4px">
-      @if (ns.unreadCount() > 0) {
+    <button
+      mat-icon-button
+      (click)="notificationService.clearUnread()"
+      class="notifications-btn"
+    >
+      @if (notificationService.unreadCount() > 0) {
         <mat-icon
-          [matBadge]="ns.unreadCount()"
+          [matBadge]="notificationService.unreadCount()"
           matBadgeColor="warn"
           matBadgeSize="small"
         >
@@ -26,7 +26,7 @@
       }
     </button>
     <button mat-button routerLink="/profile">Profile</button>
-    <button mat-button (click)="auth.logout()">Logout</button>
+    <button mat-button (click)="authService.logout()">Logout</button>
   } @else {
     <button mat-button routerLink="/sign-in">Sign In</button>
     <button mat-button routerLink="/sign-up">Sign Up</button>
