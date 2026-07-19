@@ -1,10 +1,12 @@
 <div class="page">
   <div class="page-header">
     <h1>My Auctions</h1>
+
     <button mat-raised-button color="primary" routerLink="/ads/create">
       + Create New
     </button>
   </div>
+
   @if (loading()) {
     <div class="spinner-wrap">
       <mat-spinner></mat-spinner>
@@ -21,12 +23,14 @@
               class="ad-image"
             />
           }
+
           <mat-card-header class="ad-card-header">
             <mat-card-title class="ad-card-title">{{
               ad.title
             }}</mat-card-title>
             <mat-card-subtitle>{{ ad.location }}</mat-card-subtitle>
           </mat-card-header>
+
           <mat-card-content class="ad-card-content">
             <div class="ad-footer">
               <span
@@ -35,6 +39,7 @@
               >
                 ${{ livePrice(ad) }}
               </span>
+
               <mat-chip-set>
                 <mat-chip [style.background]="statusColor(ad.status)">{{
                   ad.status
@@ -42,11 +47,13 @@
               </mat-chip-set>
             </div>
           </mat-card-content>
+
           <mat-card-actions class="ad-card-actions">
             <button mat-button [routerLink]="['/ads', ad.id]">View</button>
           </mat-card-actions>
         </mat-card>
       }
+
       @if (ads().length === 0) {
         <p class="no-results">You have no auctions yet.</p>
       }

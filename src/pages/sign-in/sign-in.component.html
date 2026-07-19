@@ -3,19 +3,23 @@
     <mat-card-header>
       <mat-card-title>Sign In</mat-card-title>
     </mat-card-header>
+
     <mat-card-content class="card-content">
       <form [formGroup]="form" (ngSubmit)="onSubmit()" class="auth-form">
         <mat-form-field appearance="outline">
           <mat-label>Username</mat-label>
           <input matInput formControlName="username" />
         </mat-form-field>
+
         <mat-form-field appearance="outline">
           <mat-label>Password</mat-label>
           <input matInput type="password" formControlName="password" />
         </mat-form-field>
+
         @if (error) {
           <p class="form-error">{{ error }}</p>
         }
+
         <button
           mat-raised-button
           color="primary"
@@ -26,6 +30,7 @@
         </button>
       </form>
     </mat-card-content>
+
     <mat-card-actions>
       <p class="card-footer">
         Don't have an account? <a routerLink="/sign-up">Sign Up</a>

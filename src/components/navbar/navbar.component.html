@@ -1,13 +1,17 @@
 <mat-toolbar color="primary">
   <span routerLink="/" class="brand">Auctioneer</span>
+
   <span class="spacer"></span>
+
   @if (authService.isLoggedIn()) {
     <button mat-button routerLink="/my-ads">My Ads</button>
     <button mat-button routerLink="/ads/create">Create Ad</button>
+
     <button mat-button routerLink="/add-credits">
       <mat-icon>account_balance_wallet</mat-icon>
       ${{ balanceService.balance() !== null ? balanceService.balance()!.toFixed(2) : '—' }}
     </button>
+
     <button
       mat-icon-button
       (click)="notificationService.clearUnread()"
@@ -25,6 +29,7 @@
         <mat-icon>notifications_none</mat-icon>
       }
     </button>
+
     <button mat-button routerLink="/profile">Profile</button>
     <button mat-button (click)="authService.logout()">Logout</button>
   } @else {

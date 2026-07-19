@@ -1,5 +1,6 @@
 <div class="page">
   <h1>Active Auctions</h1>
+
   @if (loading()) {
     <div class="spinner-wrap">
       <mat-spinner></mat-spinner>
@@ -18,20 +19,24 @@
           } @else {
             <div class="no-image">No Image</div>
           }
+
           <mat-card-header class="ad-card-header">
             <mat-card-title class="ad-card-title">{{
               ad.title
             }}</mat-card-title>
             <mat-card-subtitle>{{ ad.location }}</mat-card-subtitle>
           </mat-card-header>
+
           <mat-card-content class="ad-card-content">
             <p class="ad-description">
               {{ ad.description }}
             </p>
+
             <div class="ad-footer">
               <span class="current-price">
                 Current: ${{ livePrice(ad) }}
               </span>
+
               <mat-chip-set>
                 <mat-chip [style.background]="statusColor(ad.status)">{{
                   ad.status
@@ -41,16 +46,20 @@
           </mat-card-content>
         </mat-card>
       }
+
       @if (ads().length === 0) {
         <p class="no-results">No auctions found.</p>
       }
     </div>
+
     @if (ads().length > 0) {
       <div class="pagination">
         <button mat-button [disabled]="page() === 1" (click)="prevPage()">
           Previous
         </button>
+
         <span class="page-label">Page {{ page() }}</span>
+
         <button
           mat-button
           [disabled]="ads().length < pageSize"

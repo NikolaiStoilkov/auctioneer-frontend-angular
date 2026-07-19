@@ -4,7 +4,6 @@
       <mat-spinner></mat-spinner>
     </div>
   } @else if (ad()) {
-    <!-- ── Main Ad Card ── -->
     <mat-card>
       @if (ad()!.image) {
         <img
@@ -14,6 +13,7 @@
           class="ad-image"
         />
       }
+
       <mat-card-header class="card-header">
         <mat-card-title class="card-title">{{
           ad()!.title
@@ -29,7 +29,6 @@
 
         <mat-divider class="section-divider"></mat-divider>
 
-        <!-- ── Status chip ── -->
         <div class="status-row">
           <mat-chip-set>
             <mat-chip
@@ -39,26 +38,29 @@
               {{ ad()!.status }}
             </mat-chip>
           </mat-chip-set>
+
           @if (sseConnected()) {
             <span class="live-badge"> <span class="live-dot"></span>LIVE </span>
           }
         </div>
 
-        <!-- ── Bid Panel ── -->
         <div class="bid-panel" [class.live]="sseConnected()">
           <div class="price-row">
             <div class="price-box">
               <div class="label">Starting Price</div>
               <div class="value">${{ ad()!.startingBidPrice }}</div>
             </div>
+
             <div class="price-box highlight">
               <div class="label">Current Bid</div>
               <div class="value">${{ currentBid() }}</div>
             </div>
+
             <div class="price-box">
               <div class="label">Bid Step</div>
               <div class="value">${{ ad()!.bidStep }}</div>
             </div>
+
             @if (ad()!.status === 'ACTIVE') {
               <div class="price-box next">
                 <div class="label">Your Bid Will Be</div>
@@ -74,7 +76,6 @@
             </div>
           }
 
-          <!-- Place Bid Button (logged-in & ACTIVE) -->
           @if (isOwner()) {
             <p class="muted-note">
               <mat-icon class="icon-sm">info</mat-icon>
@@ -100,6 +101,7 @@
                   </ng-container>
                 }
               </button>
+
               @if (isHighestBidder()) {
                 <span class="bid-status">
                   <mat-icon class="icon-sm">emoji_events</mat-icon>
@@ -121,13 +123,14 @@
           }
         </div>
 
-        <!-- ── Bid History ── -->
         @if (bidHistory().length > 0) {
           <mat-divider class="section-divider"></mat-divider>
+
           <h3 class="history-title">
             <mat-icon class="icon-inline">history</mat-icon>
             Bid History
           </h3>
+
           <div>
             @for (entry of bidHistory(); track entry.timestamp) {
               <div class="bid-history-item">
@@ -146,7 +149,6 @@
       </mat-card-content>
     </mat-card>
 
-    <!-- ── Comments Card ── -->
     <mat-card class="comments-card">
       <mat-card-header class="card-header">
         <mat-card-title>
@@ -154,12 +156,14 @@
           Comments
         </mat-card-title>
       </mat-card-header>
+
       <mat-card-content class="card-content">
         @for (comment of comments(); track comment.id) {
           <div class="comment-item">
             <div class="comment-avatar">
               {{ (comment.authorUsername ?? 'U').charAt(0).toUpperCase() }}
             </div>
+
             <div class="comment-body">
               <div class="comment-meta">
                 <span class="comment-username">{{
@@ -171,13 +175,16 @@
                   }}</span>
                 }
               </div>
+
               <p class="comment-text">{{ comment.content }}</p>
             </div>
           </div>
         }
+
         @if (comments().length === 0) {
           <p class="no-comments">No comments yet.</p>
         }
+
         @if (authService.isLoggedIn()) {
           <form
             [formGroup]="commentForm"
@@ -188,6 +195,7 @@
               <mat-label>Add a comment</mat-label>
               <input matInput formControlName="content" />
             </mat-form-field>
+
             <button
               mat-raised-button
               color="primary"

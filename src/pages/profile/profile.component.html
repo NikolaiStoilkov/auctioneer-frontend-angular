@@ -2,6 +2,7 @@
   <mat-card class="profile-sidenav">
     <mat-card-content class="sidenav-content">
       <p class="section-title">Account</p>
+
       <mat-nav-list>
         <mat-list-item
           class="nav-item"
@@ -11,6 +12,7 @@
           <mat-icon matListItemIcon>person</mat-icon>
           <span matListItemTitle>Profile Information</span>
         </mat-list-item>
+
         <mat-list-item
           class="nav-item"
           [class.active]="activeTab() === 'payment'"
@@ -29,6 +31,7 @@
         <mat-card-title>Profile Information</mat-card-title>
         <mat-card-subtitle>Update your personal details</mat-card-subtitle>
       </mat-card-header>
+
       <mat-card-content class="tab-content">
         @if (loading()) {
           <div class="spinner-wrap">
@@ -45,44 +48,53 @@
               <mat-icon matPrefix>account_circle</mat-icon>
               <input matInput formControlName="username" />
             </mat-form-field>
+
             <div class="form-row">
               <mat-form-field appearance="outline">
                 <mat-label>First Name</mat-label>
                 <input matInput formControlName="firstName" />
               </mat-form-field>
+
               <mat-form-field appearance="outline">
                 <mat-label>Last Name</mat-label>
                 <input matInput formControlName="lastName" />
               </mat-form-field>
             </div>
+
             <mat-form-field appearance="outline">
               <mat-label>Email</mat-label>
               <mat-icon matPrefix>email</mat-icon>
               <input matInput formControlName="email" type="email" />
             </mat-form-field>
+
             <mat-form-field appearance="outline">
               <mat-label>Phone</mat-label>
               <mat-icon matPrefix>phone</mat-icon>
               <input matInput formControlName="phoneNumber" />
             </mat-form-field>
+
             <div class="form-row">
               <mat-form-field appearance="outline">
                 <mat-label>City</mat-label>
                 <input matInput formControlName="city" />
               </mat-form-field>
+
               <mat-form-field appearance="outline">
                 <mat-label>Country</mat-label>
                 <input matInput formControlName="country" />
               </mat-form-field>
             </div>
+
             @if (profileSuccess) {
               <p class="success-msg">✓ Profile updated successfully.</p>
             }
+
             @if (profileError) {
               <p class="error-msg">
                 {{ profileError }}
               </p>
             }
+
             <button
               mat-raised-button
               color="primary"
@@ -110,8 +122,8 @@
           >Securely save your card via Stripe</mat-card-subtitle
         >
       </mat-card-header>
+
       <mat-card-content class="tab-content-payment">
-        <!-- ── Saved Cards ── -->
         @if (cardsLoading()) {
           <div class="cards-spinner-wrap">
             <mat-spinner diameter="28"></mat-spinner>
@@ -119,6 +131,7 @@
         } @else if (savedCards().length > 0) {
           <div class="saved-cards">
             <p class="cards-label">Saved Cards</p>
+
             @for (pm of savedCards(); track pm.id) {
               <div class="saved-card">
                 <mat-icon class="card-icon">credit_card</mat-icon>
@@ -129,6 +142,7 @@
                 </span>
               </div>
             }
+
             <mat-divider class="cards-divider"></mat-divider>
           </div>
         }
@@ -144,23 +158,28 @@
               securely by Stripe. Use test card
               <strong>4242 4242 4242 4242</strong>, any future date and any CVC.
             </p>
+
             <div>
               <label class="field-label">Card details</label>
               <div id="stripe-card-element" #cardElementRef></div>
+
               @if (cardError) {
                 <p class="field-error">
                   {{ cardError }}
                 </p>
               }
             </div>
+
             @if (paymentSuccess) {
               <p class="success-msg-lg">✓ Payment method saved successfully!</p>
             }
+
             @if (paymentError) {
               <p class="error-msg-lg">
                 {{ paymentError }}
               </p>
             }
+
             <button
               mat-raised-button
               color="primary"
