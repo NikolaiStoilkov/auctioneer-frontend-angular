@@ -9,17 +9,16 @@ import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
 import { DecimalPipe, DatePipe } from '@angular/common';
-import {
-  loadStripe,
-  Stripe,
-  StripeElements,
-  StripeCardElement,
-} from '@stripe/stripe-js';
+import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
 import { WalletService } from '../../services/wallet/wallet.service';
 import { StripeService } from '../../services/stripe/stripe.service';
-import { WalletBalance, CreditTransaction } from '../../core/domain/wallet.model';
+import {
+  WalletBalance,
+  CreditTransaction,
+} from '../../core/domain/wallet.model';
 import { PaymentMethodResponse } from '../../core/domain/stripe.model';
 import { SpinnerComponent } from '../../components/spinner/spinner.component';
+import { createAndMountStripeCard } from '../../shared/stripe-card.util';
 
 /** Quick-select top-up amounts offered on the page. */
 const PRESET_AMOUNTS = [10, 25, 50, 100, 250, 500];
@@ -179,33 +178,11 @@ export class AddCreditsComponent implements OnInit {
       return;
     }
     this.stripeLoading.set(true);
-    const elements: StripeElements = this.stripe.elements();
-    this.cardElement = elements.create('card', {
-      hidePostalCode: true,
-      style: {
-        base: {
-          fontSize: '16px',
-          color: '#333',
-          '::placeholder': { color: '#999' },
-        },
-        invalid: { color: '#d32f2f' },
-      },
-    });
-    const cardContainerElement = document.getElementById(
+    this.cardElement = createAndMountStripeCard(
+      this.stripe,
       'stripe-payment-element',
+      (message) => (this.cardError = message),
     );
-    if (cardContainerElement) {
-      this.cardElement.mount(cardContainerElement);
-      this.cardElement.on('change', (event) => {
-        this.cardError = event.error ? event.error.message : '';
-      });
-      this.cardElement.on('focus', () =>
-        cardContainerElement.classList.add('focused'),
-      );
-      this.cardElement.on('blur', () =>
-        cardContainerElement.classList.remove('focused'),
-      );
-    }
     this.stripeLoading.set(false);
   }
 

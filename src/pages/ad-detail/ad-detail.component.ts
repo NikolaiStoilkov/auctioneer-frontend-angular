@@ -4,7 +4,7 @@ import {
   inject,
   OnDestroy,
   OnInit,
-  signal
+  signal,
 } from '@angular/core';
 
 import { DatePipe } from '@angular/common';
@@ -29,7 +29,7 @@ import { CommentService } from '../../services/comment/comment.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { BalanceService } from '../../services/wallet/balance.service';
 import { SpinnerComponent } from '../../components/spinner/spinner.component';
-
+import { AdStatusColorPipe } from '../../shared/ad-status-color.pipe';
 
 /**
  * Ad detail page — the live auction view for a single ad.
@@ -54,10 +54,11 @@ import { SpinnerComponent } from '../../components/spinner/spinner.component';
     MatDividerModule,
     MatChipsModule,
     MatIconModule,
-    MatTooltipModule
+    MatTooltipModule,
+    AdStatusColorPipe,
   ],
   templateUrl: './ad-detail.component.html',
-  styleUrl: './ad-detail.component.css'
+  styleUrl: './ad-detail.component.css',
 })
 export class AdDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
@@ -90,7 +91,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
 
   /** The current price of the auction, falling back to the starting price. */
   currentBid = computed(
-    () => this.ad()?.currentBidPrice ?? this.ad()?.startingBidPrice ?? 0
+    () => this.ad()?.currentBidPrice ?? this.ad()?.startingBidPrice ?? 0,
   );
 
   /** The price the next bid will be placed at (`current price + bid step`). */
@@ -122,32 +123,32 @@ export class AdDetailComponent implements OnInit, OnDestroy {
 
   /** Form for posting a new comment (max 100 characters). */
   commentForm = this.formBuilder.group({
-    content: ['', [Validators.required, Validators.maxLength(100)]]
+    content: ['', [Validators.required, Validators.maxLength(100)]],
   });
 
   private sseSource: EventSource | null = null;
   private adId = 0;
 
-  ngOnInit (): void {
+  ngOnInit(): void {
     this.adId = Number(this.route.snapshot.paramMap.get('id'));
     this.loadAd();
     this.loadComments();
     this.connectSse();
   }
 
-  ngOnDestroy (): void {
+  ngOnDestroy(): void {
     this.disconnectSse();
   }
 
   /** Fetches the ad and seeds the bid history from its last bidders. */
-  private loadAd (): void {
+  private loadAd(): void {
     this.adService.getById(this.adId).subscribe({
       next: (ad) => {
         this.ad.set(ad);
         this.loading.set(false);
         this.initBidHistoryFromAd(ad);
       },
-      error: () => this.loading.set(false)
+      error: () => this.loading.set(false),
     });
   }
 
@@ -157,7 +158,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
    *
    * @param ad The freshly loaded ad.
    */
-  private initBidHistoryFromAd (ad: Ad): void {
+  private initBidHistoryFromAd(ad: Ad): void {
     if (!ad.lastBidders?.length) {
       return;
     }
@@ -166,7 +167,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
       .sort(
         (firstBidder, secondBidder) =>
           new Date(secondBidder.timestamp!).getTime() -
-          new Date(firstBidder.timestamp!).getTime()
+          new Date(firstBidder.timestamp!).getTime(),
       )
       .slice(0, 10);
 
@@ -176,7 +177,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
       nextMinimumBid: bidder.amount! + (ad.bidStep ?? 0),
       latestBidderUsername: bidder.username ?? '',
       latestBidderUserId: bidder.userId,
-      timestamp: bidder.timestamp!
+      timestamp: bidder.timestamp!,
     }));
 
     this.bidHistory.set(bidHistoryEntries);
@@ -188,9 +189,9 @@ export class AdDetailComponent implements OnInit, OnDestroy {
   }
 
   /** Fetches the ad's comments. */
-  private loadComments (): void {
+  private loadComments(): void {
     this.commentService.getByAdId(this.adId).subscribe({
-      next: (loadedComments) => this.comments.set(loadedComments)
+      next: (loadedComments) => this.comments.set(loadedComments),
     });
   }
 
@@ -203,7 +204,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
    * them from the (zone-free) EventSource callbacks schedules change
    * detection automatically — no NgZone needed.
    */
-  private connectSse (): void {
+  private connectSse(): void {
     const url = ADS_API.bidStream(this.adId);
     try {
       this.sseSource = new EventSource(url);
@@ -225,7 +226,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
   }
 
   /** Closes the SSE bid stream. */
-  private disconnectSse (): void {
+  private disconnectSse(): void {
     this.sseSource?.close();
     this.sseSource = null;
   }
@@ -236,11 +237,11 @@ export class AdDetailComponent implements OnInit, OnDestroy {
    *
    * @param bidUpdate Bid received from the SSE stream or a bid response.
    */
-  private applyBidUpdate (bidUpdate: BidResponse): void {
+  private applyBidUpdate(bidUpdate: BidResponse): void {
     this.ad.update((currentAd) =>
       currentAd
         ? { ...currentAd, currentBidPrice: bidUpdate.currentBidPrice }
-        : currentAd
+        : currentAd,
     );
     this.latestBidderUsername.set(bidUpdate.latestBidderUsername ?? '');
     this.latestBidderUserId.set(bidUpdate.latestBidderUserId ?? null);
@@ -250,7 +251,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
         history.some(
           (historyEntry) =>
             historyEntry.timestamp === bidUpdate.timestamp &&
-            historyEntry.currentBidPrice === bidUpdate.currentBidPrice
+            historyEntry.currentBidPrice === bidUpdate.currentBidPrice,
         )
       ) {
         return history;
@@ -269,7 +270,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
    * state and wallet balance are refreshed; on failure the server's
    * error message is shown.
    */
-  placeBid (): void {
+  placeBid(): void {
     if (!this.ad() || this.bidding()) {
       return;
     }
@@ -293,7 +294,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
         this.bidding.set(false);
 
         this.bidMessage.set(
-          `Bid placed! Next minimum: $${bidResponse.nextMinimumBid}`
+          `Bid placed! Next minimum: $${bidResponse.nextMinimumBid}`,
         );
 
         this.bidError.set(false);
@@ -313,16 +314,16 @@ export class AdDetailComponent implements OnInit, OnDestroy {
         this.bidMessage.set(
           typeof errorMessage === 'string'
             ? errorMessage
-            : 'Failed to place bid.'
+            : 'Failed to place bid.',
         );
 
         this.bidError.set(true);
-      }
+      },
     });
   }
 
   /** Posts the comment from {@link commentForm}, then resets the form and reloads the comments. */
-  addComment (): void {
+  addComment(): void {
     if (this.commentForm.invalid || !this.ad()) {
       return;
     }
@@ -336,32 +337,14 @@ export class AdDetailComponent implements OnInit, OnDestroy {
     const comment = {
       content: this.commentForm.value.content!,
       authorId: userId,
-      adId: this.adId
+      adId: this.adId,
     };
 
     this.commentService.create(comment).subscribe({
       next: () => {
         this.commentForm.reset();
         this.loadComments();
-      }
+      },
     });
-  }
-
-  /**
-   * Maps an ad status to its chip background color.
-   *
-   * @param status Ad status (`ACTIVE`, `SOLD`, or other).
-   * @returns A CSS color: green for active, red for sold, yellow otherwise.
-   */
-  statusColor (status?: string): string {
-    if (status === 'ACTIVE') {
-      return '#c8e6c9';
-    }
-
-    if (status === 'SOLD') {
-      return '#ffcdd2';
-    }
-
-    return '#fff9c4';
   }
 }

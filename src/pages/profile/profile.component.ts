@@ -16,18 +16,14 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
-import {
-  loadStripe,
-  Stripe,
-  StripeElements,
-  StripeCardElement,
-} from '@stripe/stripe-js';
+import { loadStripe, Stripe, StripeCardElement } from '@stripe/stripe-js';
 import { UserService } from '../../services/user/user.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { StripeService } from '../../services/stripe/stripe.service';
 import { User } from '../../core/domain/user.model';
 import { PaymentMethodResponse } from '../../core/domain/stripe.model';
 import { SpinnerComponent } from '../../components/spinner/spinner.component';
+import { createAndMountStripeCard } from '../../shared/stripe-card.util';
 
 /** The two tabs of the profile page. */
 type ProfileTab = 'info' | 'payment';
@@ -83,7 +79,6 @@ export class ProfileComponent implements OnInit {
 
   private user: User | null = null;
   private stripe: Stripe | null = null;
-  private stripeElements: StripeElements | null = null;
   private cardElement: StripeCardElement | null = null;
   private setupClientSecret = '';
 
@@ -163,7 +158,6 @@ export class ProfileComponent implements OnInit {
     if (this.activeTab() === 'payment' && tab !== 'payment') {
       this.cardElement?.unmount();
       this.cardElement = null;
-      this.stripeElements = null;
       this.stripe = null;
       this.setupClientSecret = '';
     }
@@ -204,41 +198,15 @@ export class ProfileComponent implements OnInit {
         throw new Error('Stripe failed to load');
       }
 
-      this.stripeElements = this.stripe.elements();
-      this.cardElement = this.stripeElements.create('card', {
-        hidePostalCode: true,
-        style: {
-          base: {
-            fontSize: '16px',
-            color: '#333',
-            '::placeholder': { color: '#999' },
-          },
-          invalid: { color: '#d32f2f' },
-        },
-      });
-
       this.paymentLoading.set(false);
       // Yield one macrotask so the card container exists in the DOM.
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
-      const cardContainerElement = document.getElementById(
+      this.cardElement = createAndMountStripeCard(
+        this.stripe,
         'stripe-card-element',
+        (message) => (this.cardError = message),
       );
-
-      if (cardContainerElement) {
-        this.cardElement.mount(cardContainerElement);
-
-        this.cardElement.on('change', (event) => {
-          this.cardError = event.error ? event.error.message : '';
-        });
-
-        this.cardElement.on('focus', () =>
-          cardContainerElement.classList.add('focused'),
-        );
-        this.cardElement.on('blur', () =>
-          cardContainerElement.classList.remove('focused'),
-        );
-      }
     } catch {
       this.paymentError =
         'Could not load Stripe. Check your publishable key in backend config.';
@@ -278,8 +246,6 @@ export class ProfileComponent implements OnInit {
       this.cardElement?.unmount();
 
       this.cardElement = null;
-
-      this.stripeElements = null;
 
       this.stripe = null;
 

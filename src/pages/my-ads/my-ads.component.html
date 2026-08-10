@@ -39,7 +39,7 @@
               </span>
 
               <mat-chip-set>
-                <mat-chip [style.background]="statusColor(ad.status)">{{
+                <mat-chip [style.background]="ad.status | adStatusColor">{{
                   ad.status
                 }}</mat-chip>
               </mat-chip-set>

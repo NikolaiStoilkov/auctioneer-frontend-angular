@@ -13,9 +13,7 @@
       }
 
       <mat-card-header class="card-header">
-        <mat-card-title class="card-title">{{
-          ad()!.title
-        }}</mat-card-title>
+        <mat-card-title class="card-title">{{ ad()!.title }}</mat-card-title>
         <mat-card-subtitle>
           <mat-icon class="icon-xs">place</mat-icon>
           {{ ad()!.location }}
@@ -30,7 +28,7 @@
         <div class="status-row">
           <mat-chip-set>
             <mat-chip
-              [style.background]="statusColor(ad()!.status)"
+              [style.background]="ad()!.status | adStatusColor"
               class="status-chip"
             >
               {{ ad()!.status }}

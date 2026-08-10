@@ -31,12 +31,10 @@
             </p>
 
             <div class="ad-footer">
-              <span class="current-price">
-                Current: ${{ livePrice(ad) }}
-              </span>
+              <span class="current-price"> Current: ${{ livePrice(ad) }} </span>
 
               <mat-chip-set>
-                <mat-chip [style.background]="statusColor(ad.status)">{{
+                <mat-chip [style.background]="ad.status | adStatusColor">{{
                   ad.status
                 }}</mat-chip>
               </mat-chip-set>
