@@ -19,8 +19,9 @@ export interface Ad {
   location: string;
   images?: string[];
   isActive?: boolean;
-  status?: 'ACTIVE' | 'INACTIVE' | 'SOLD';
+  status?: 'ACTIVE' | 'INACTIVE' | 'SOLD' | 'CLOSED';
   startingDate?: string;
+  endDate?: string;
   balance?: number;
 }
 

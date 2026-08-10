@@ -27,14 +27,13 @@ export class CommentService {
   }
 
   /**
-   * Posts a new comment on the given ad.
+   * Posts a new comment. The target ad id travels inside the payload.
    *
-   * @param adId Id of the ad to comment on.
-   * @param comment Comment payload to create.
+   * @param comment Comment payload to create (includes adId).
    * @returns Observable completing when the comment has been created.
    */
-  create(adId: number, comment: Comment) {
-    return this.http.post(this.api.create(adId), comment);
+  create(comment: Comment) {
+    return this.http.post(this.api.create, comment);
   }
 
   /**

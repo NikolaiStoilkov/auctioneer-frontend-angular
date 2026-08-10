@@ -1,8 +1,6 @@
 <div class="page">
   @if (loading()) {
-    <div class="spinner-wrap">
-      <mat-spinner></mat-spinner>
-    </div>
+    <app-spinner />
   } @else if (ad()) {
     <mat-card>
       @if (ad()!.image) {
@@ -91,10 +89,7 @@
                 class="bid-button"
               >
                 @if (bidding()) {
-                  <mat-spinner
-                    diameter="20"
-                    class="inline-spinner"
-                  ></mat-spinner>
+                  <app-spinner inline [diameter]="20" />
                 } @else {
                   <ng-container>
                     <mat-icon>gavel</mat-icon>&nbsp;Place Bid — ${{ nextBid() }}

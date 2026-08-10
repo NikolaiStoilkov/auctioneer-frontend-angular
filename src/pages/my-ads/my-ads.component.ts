@@ -3,10 +3,10 @@ import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Ad } from '../../core/domain/ad.model';
 import { AdService } from '../../services/ads/ad.service';
 import { NotificationService } from '../../services/notification/notification.service';
+import { SpinnerComponent } from '../../components/spinner/spinner.component';
 
 /**
  * "My ads" page listing the auctions created by the logged-in user,
@@ -16,11 +16,11 @@ import { NotificationService } from '../../services/notification/notification.se
   selector: 'app-my-ads',
   standalone: true,
   imports: [
+    SpinnerComponent,
     RouterLink,
     MatCardModule,
     MatButtonModule,
     MatChipsModule,
-    MatProgressSpinnerModule,
   ],
   templateUrl: './my-ads.component.html',
   styleUrl: './my-ads.component.css',

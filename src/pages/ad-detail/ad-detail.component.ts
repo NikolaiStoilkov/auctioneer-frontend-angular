@@ -1,6 +1,5 @@
 import {
   Component,
-  NgZone,
   computed,
   inject,
   OnDestroy,
@@ -19,7 +18,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { ADS_API } from '../../core/config/ads.api';
 
@@ -30,6 +28,7 @@ import { AdService } from '../../services/ads/ad.service';
 import { CommentService } from '../../services/comment/comment.service';
 import { AuthService } from '../../services/auth/auth.service';
 import { BalanceService } from '../../services/wallet/balance.service';
+import { SpinnerComponent } from '../../components/spinner/spinner.component';
 
 
 /**
@@ -44,6 +43,7 @@ import { BalanceService } from '../../services/wallet/balance.service';
   selector: 'app-ad-detail',
   standalone: true,
   imports: [
+    SpinnerComponent,
     ReactiveFormsModule,
     RouterLink,
     DatePipe,
@@ -52,7 +52,6 @@ import { BalanceService } from '../../services/wallet/balance.service';
     MatFormFieldModule,
     MatInputModule,
     MatDividerModule,
-    MatProgressSpinnerModule,
     MatChipsModule,
     MatIconModule,
     MatTooltipModule
@@ -64,7 +63,6 @@ export class AdDetailComponent implements OnInit, OnDestroy {
   private route = inject(ActivatedRoute);
   private adService = inject(AdService);
   private commentService = inject(CommentService);
-  private ngZone = inject(NgZone);
   private balanceService = inject(BalanceService);
   authService = inject(AuthService);
   private formBuilder = inject(FormBuilder);
@@ -201,8 +199,9 @@ export class AdDetailComponent implements OnInit, OnDestroy {
   /**
    * Opens the ad's SSE bid stream and applies incoming bid events.
    *
-   * Events arrive outside Angular's zone, so updates are re-entered
-   * via `NgZone.run` to trigger change detection.
+   * The app is zoneless: all view state lives in signals, so writing to
+   * them from the (zone-free) EventSource callbacks schedules change
+   * detection automatically — no NgZone needed.
    */
   private connectSse (): void {
     const url = ADS_API.bidStream(this.adId);
@@ -212,16 +211,14 @@ export class AdDetailComponent implements OnInit, OnDestroy {
       this.sseSource.addEventListener('bid', (event: MessageEvent) => {
         try {
           const bidUpdate: BidResponse = JSON.parse(event.data);
-          this.ngZone.run(() => this.applyBidUpdate(bidUpdate));
+          this.applyBidUpdate(bidUpdate);
         } catch {
           /* ignore parse errors */
         }
       });
 
-      this.sseSource.onopen = () =>
-        this.ngZone.run(() => this.sseConnected.set(true));
-      this.sseSource.onerror = () =>
-        this.ngZone.run(() => this.sseConnected.set(false));
+      this.sseSource.onopen = () => this.sseConnected.set(true);
+      this.sseSource.onerror = () => this.sseConnected.set(false);
     } catch {
       console.log(url);
     }
@@ -342,7 +339,7 @@ export class AdDetailComponent implements OnInit, OnDestroy {
       adId: this.adId
     };
 
-    this.commentService.create(this.adId, comment).subscribe({
+    this.commentService.create(comment).subscribe({
       next: () => {
         this.commentForm.reset();
         this.loadComments();

@@ -44,9 +44,13 @@
           mat-raised-button
           color="primary"
           type="submit"
-          [disabled]="form.invalid"
+          [disabled]="form.invalid || creating()"
         >
-          Create Auction
+          @if (creating()) {
+            <app-spinner inline [diameter]="20" />
+          } @else {
+            Create Auction
+          }
         </button>
       </form>
     </mat-card-content>

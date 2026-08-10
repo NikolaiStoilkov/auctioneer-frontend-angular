@@ -34,9 +34,7 @@
 
       <mat-card-content class="tab-content">
         @if (loading()) {
-          <div class="spinner-wrap">
-            <mat-spinner></mat-spinner>
-          </div>
+          <app-spinner />
         } @else {
           <form
             [formGroup]="form"
@@ -102,10 +100,7 @@
               [disabled]="form.invalid || saving()"
             >
               @if (saving()) {
-                <mat-spinner
-                  diameter="20"
-                  class="inline-spinner"
-                ></mat-spinner>
+                <app-spinner inline [diameter]="20" />
               } @else {
                 Save Changes
               }
@@ -126,7 +121,7 @@
       <mat-card-content class="tab-content-payment">
         @if (cardsLoading()) {
           <div class="cards-spinner-wrap">
-            <mat-spinner diameter="28"></mat-spinner>
+            <app-spinner inline [diameter]="28" />
           </div>
         } @else if (savedCards().length > 0) {
           <div class="saved-cards">
@@ -148,9 +143,7 @@
         }
 
         @if (paymentLoading()) {
-          <div class="spinner-wrap">
-            <mat-spinner></mat-spinner>
-          </div>
+          <app-spinner />
         } @else {
           <div class="payment-form">
             <p class="hint-text">
@@ -188,10 +181,7 @@
               class="save-card-btn"
             >
               @if (confirmingCard()) {
-                <mat-spinner
-                  diameter="22"
-                  class="inline-spinner"
-                ></mat-spinner>
+                <app-spinner inline [diameter]="22" />
               } @else {
                 <ng-container>
                   <mat-icon>lock</mat-icon>

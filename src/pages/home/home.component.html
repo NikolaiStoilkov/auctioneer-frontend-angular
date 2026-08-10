@@ -2,9 +2,7 @@
   <h1>Active Auctions</h1>
 
   @if (loading()) {
-    <div class="spinner-wrap">
-      <mat-spinner></mat-spinner>
-    </div>
+    <app-spinner />
   } @else {
     <div class="ads-grid">
       @for (ad of ads(); track ad.id) {

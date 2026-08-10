@@ -3,10 +3,10 @@ import { RouterLink } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { Ad, AdFilter } from '../../core/domain/ad.model';
 import { AdService } from '../../services/ads/ad.service';
 import { NotificationService } from '../../services/notification/notification.service';
+import { SpinnerComponent } from '../../components/spinner/spinner.component';
 
 /**
  * Home page listing all active auctions.
@@ -18,11 +18,11 @@ import { NotificationService } from '../../services/notification/notification.se
   selector: 'app-home',
   standalone: true,
   imports: [
+    SpinnerComponent,
     RouterLink,
     MatCardModule,
     MatButtonModule,
     MatChipsModule,
-    MatProgressSpinnerModule,
   ],
   templateUrl: './home.component.html',
   styleUrl: './home.component.css',

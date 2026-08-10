@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
@@ -6,7 +6,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { AdService } from '../../services/ads/ad.service';
-import { AuthService } from '../../services/auth/auth.service';
+import { SpinnerComponent } from '../../components/spinner/spinner.component';
 
 /**
  * Page for creating a new auction ad.
@@ -18,6 +18,7 @@ import { AuthService } from '../../services/auth/auth.service';
   selector: 'app-ad-create',
   standalone: true,
   imports: [
+    SpinnerComponent,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
@@ -30,11 +31,13 @@ import { AuthService } from '../../services/auth/auth.service';
 export class AdCreateComponent {
   private formBuilder = inject(FormBuilder);
   private adService = inject(AdService);
-  private authService = inject(AuthService);
   private router = inject(Router);
 
   /** Error message shown when creation fails. */
   error = '';
+
+  /** `true` while the create request is in flight — drives the button spinner. */
+  creating = signal(false);
 
   /** New-ad form: title, description, location, starting price, bid step, optional image. */
   form = this.formBuilder.group({
@@ -64,29 +67,32 @@ export class AdCreateComponent {
 
   /** Creates the ad from the form values and navigates to "My ads" on success. */
   onSubmit(): void {
-    if (this.form.invalid) {
+    if (this.form.invalid || this.creating()) {
       return;
     }
 
     const formValue = this.form.value;
-    const userId = this.authService.getUserIdFromToken();
 
+    this.creating.set(true);
+    this.error = '';
+
+    // Server-controlled fields (author, price state, status) are no longer
+    // part of the request DTO — the API derives them itself.
     this.adService
       .create({
         title: formValue.title!,
         description: formValue.description!,
         location: formValue.location!,
         startingBidPrice: formValue.startingBidPrice!,
-        currentBidPrice: formValue.startingBidPrice!,
         bidStep: formValue.bidStep!,
         image: formValue.image || undefined,
-        authorId: userId ?? undefined,
-        status: 'ACTIVE',
-        isActive: true,
       })
       .subscribe({
         next: () => this.router.navigate(['/my-ads']),
-        error: () => (this.error = 'Failed to create auction.'),
+        error: () => {
+          this.error = 'Failed to create auction.';
+          this.creating.set(false);
+        },
       });
   }
 }

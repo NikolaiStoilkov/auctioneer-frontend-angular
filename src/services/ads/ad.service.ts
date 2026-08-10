@@ -55,7 +55,7 @@ export class AdService {
    * @returns Observable completing when the ad has been updated.
    */
   edit(adId: number, ad: Ad){
-    return this.http.post<void>(this.api.edit(adId), ad);
+    return this.http.put<void>(this.api.edit(adId), ad);
   }
 
   /**

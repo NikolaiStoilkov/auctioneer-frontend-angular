@@ -4,7 +4,6 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTableModule } from '@angular/material/table';
 import { MatDividerModule } from '@angular/material/divider';
@@ -20,6 +19,7 @@ import { WalletService } from '../../services/wallet/wallet.service';
 import { StripeService } from '../../services/stripe/stripe.service';
 import { WalletBalance, CreditTransaction } from '../../core/domain/wallet.model';
 import { PaymentMethodResponse } from '../../core/domain/stripe.model';
+import { SpinnerComponent } from '../../components/spinner/spinner.component';
 
 /** Quick-select top-up amounts offered on the page. */
 const PRESET_AMOUNTS = [10, 25, 50, 100, 250, 500];
@@ -36,12 +36,12 @@ const PRESET_AMOUNTS = [10, 25, 50, 100, 250, 500];
   selector: 'app-add-credits',
   standalone: true,
   imports: [
+    SpinnerComponent,
     ReactiveFormsModule,
     MatCardModule,
     MatButtonModule,
     MatFormFieldModule,
     MatInputModule,
-    MatProgressSpinnerModule,
     MatIconModule,
     MatTableModule,
     MatDividerModule,

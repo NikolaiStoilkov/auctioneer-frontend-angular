@@ -7,12 +7,12 @@ import {
   ElementRef,
 } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { firstValueFrom, forkJoin } from 'rxjs';
 import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
@@ -27,6 +27,7 @@ import { AuthService } from '../../services/auth/auth.service';
 import { StripeService } from '../../services/stripe/stripe.service';
 import { User } from '../../core/domain/user.model';
 import { PaymentMethodResponse } from '../../core/domain/stripe.model';
+import { SpinnerComponent } from '../../components/spinner/spinner.component';
 
 /** The two tabs of the profile page. */
 type ProfileTab = 'info' | 'payment';
@@ -44,12 +45,12 @@ type ProfileTab = 'info' | 'payment';
   selector: 'app-profile',
   standalone: true,
   imports: [
+    SpinnerComponent,
     ReactiveFormsModule,
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
-    MatProgressSpinnerModule,
     MatListModule,
     MatIconModule,
     MatDividerModule,
@@ -187,20 +188,14 @@ export class ProfileComponent implements OnInit {
     this.paymentLoading.set(true);
     this.paymentSuccess = false;
     try {
-      const config = await new Promise<{ publishableKey: string }>(
-        (resolve, reject) => {
-          this.stripeService
-            .getConfig()
-            .subscribe({ next: resolve, error: reject });
-        },
-      );
-
-      const setupIntentResponse = await new Promise<{ clientSecret: string }>(
-        (resolve, reject) => {
-          this.stripeService
-            .createSetupIntent()
-            .subscribe({ next: resolve, error: reject });
-        },
+      // Observables all the way to the async boundary: both HTTP calls run
+      // in parallel via forkJoin and are only bridged to a promise once,
+      // right where Stripe.js (a promise-based SDK) takes over.
+      const { config, setupIntentResponse } = await firstValueFrom(
+        forkJoin({
+          config: this.stripeService.getConfig(),
+          setupIntentResponse: this.stripeService.createSetupIntent(),
+        }),
       );
 
       this.setupClientSecret = setupIntentResponse.clientSecret;
@@ -223,6 +218,7 @@ export class ProfileComponent implements OnInit {
       });
 
       this.paymentLoading.set(false);
+      // Yield one macrotask so the card container exists in the DOM.
       await new Promise<void>((resolve) => setTimeout(resolve, 0));
 
       const cardContainerElement = document.getElementById(
